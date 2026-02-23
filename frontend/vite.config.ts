@@ -31,7 +31,8 @@ export default defineConfig({
     },
   },
   server: {
-    port: process.env.VITE_PORT ? parseInt(process.env.VITE_PORT) : 5173,
+    port: process.env.VITE_PORT ? parseInt(process.env.VITE_PORT) : 5174,
+    allowedHosts: ['dev.claudeai.best', 'localhost', '127.0.0.1'],
     proxy: {
       '/admin': {
         target: process.env.VITE_API_URL || 'http://localhost:8090',

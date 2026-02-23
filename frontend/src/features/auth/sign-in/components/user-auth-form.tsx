@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/password-input';
 import { useSignIn } from '@/features/auth/data/auth';
+import { SocialLoginButtons } from '@/features/auth/components/social-login-buttons';
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>;
 
@@ -122,6 +123,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             t('auth.signIn.form.signInButton')
           )}
         </Button>
+
+        {/* Social Login Buttons */}
+        <SocialLoginButtons />
       </form>
     </Form>
   );
