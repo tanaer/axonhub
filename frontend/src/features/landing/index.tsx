@@ -1,7 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function LandingPage() {
+  const { accessToken } = useAuthStore();
+  const isLoggedIn = !!accessToken;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
       {/* Header */}
@@ -11,14 +15,24 @@ export default function LandingPage() {
           <span className="text-2xl font-bold text-white">MuskAPI</span>
         </div>
         <nav className="flex items-center gap-6">
-          <a href="#features" className="text-slate-300 hover:text-white transition">功能</a>
-          <a href="#pricing" className="text-slate-300 hover:text-white transition">定价</a>
-          <Link to="/sign-in">
-            <Button variant="outline" className="text-white border-white/30 hover:bg-white/10">登录</Button>
-          </Link>
-          <Link to="/sign-up">
-            <Button className="bg-indigo-600 hover:bg-indigo-700">免费开始</Button>
-          </Link>
+          <a href="#features" className="text-slate-300 hover:text-white transition-colors">功能</a>
+          <a href="#pricing" className="text-slate-300 hover:text-white transition-colors">定价</a>
+          {isLoggedIn ? (
+            <>
+              <Link to="/dashboard">
+                <Button className="bg-indigo-600 hover:bg-indigo-700">控制台</Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/sign-in">
+                <Button className="bg-white/10 text-white border border-white/30 hover:bg-white/20">登录</Button>
+              </Link>
+              <Link to="/sign-up">
+                <Button className="bg-indigo-600 hover:bg-indigo-700">免费开始</Button>
+              </Link>
+            </>
+          )}
         </nav>
       </header>
 
@@ -37,7 +51,7 @@ export default function LandingPage() {
             </Button>
           </Link>
           <a href="https://docs.muskapi.com" target="_blank" rel="noopener">
-            <Button size="lg" variant="outline" className="text-white border-white/30 hover:bg-white/10 text-lg px-8">
+            <Button size="lg" className="bg-white/10 text-white border border-white/30 hover:bg-white/20 text-lg px-8">
               查看文档
             </Button>
           </a>
