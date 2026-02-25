@@ -93,12 +93,12 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 		// System Status and Initialize - DO NOT AUTH
 		unSecureAdminGroup.GET("/system/status", handlers.System.GetSystemStatus)
 		unSecureAdminGroup.POST("/system/initialize", handlers.System.InitializeSystem)
-		// User Login - DO NOT AUTH
-		unSecureAdminGroup.POST("/auth/signin", handlers.Auth.SignIn)
-		// User Registration - DO NOT AUTH
-		unSecureAdminGroup.POST("/auth/signup", handlers.Auth.SignUp)
-		// Forgot Password - DO NOT AUTH
-		unSecureAdminGroup.POST("/auth/forgot-password", handlers.Auth.ForgotPassword)
+		// User Login - DO NOT AUTH (with rate limiting)
+		unSecureAdminGroup.POST("/auth/signin", middleware.WithAuthRateLimit(), handlers.Auth.SignIn)
+		// User Registration - DO NOT AUTH (with rate limiting)
+		unSecureAdminGroup.POST("/auth/signup", middleware.WithAuthRateLimit(), handlers.Auth.SignUp)
+		// Forgot Password - DO NOT AUTH (with rate limiting)
+		unSecureAdminGroup.POST("/auth/forgot-password", middleware.WithAuthRateLimit(), handlers.Auth.ForgotPassword)
 	}
 
 	adminGroup := server.Group("/admin", middleware.WithJWTAuth(services.AuthService), middleware.WithProjectID())
