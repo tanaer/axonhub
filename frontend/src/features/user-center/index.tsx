@@ -430,7 +430,11 @@ function ReferralView() {
 export default function UserCenter() {
   const { t } = useTranslation();
   const params = useParams({ strict: false });
-  const currentSection = (params as any).section || 'account';
+  const location = window.location.pathname;
+  
+  // 从 URL 路径中提取 section
+  const pathSection = location.split('/user-center/')[1]?.split('/')[0];
+  const currentSection = pathSection || (params as any).section || 'account';
 
   const renderContent = () => {
     switch (currentSection) {
