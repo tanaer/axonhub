@@ -75,8 +75,10 @@ export function useSignIn() {
 
       // Redirect based on user role
       // Owner users go to dashboard, non-owner users go to requests page
-      const redirectPath = data.user.isOwner ? '/' : '/project/playground';
-      router.navigate({ to: redirectPath });
+      const redirectPath = data.user.isOwner ? '/dashboard' : '/project/playground';
+      
+      // Use window.location for full page refresh to ensure auth state is loaded
+      window.location.href = redirectPath;
     },
     onError: (error: any) => {
       const errorMessage = error.message || 'Failed to sign in';

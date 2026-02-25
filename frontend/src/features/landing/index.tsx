@@ -1,12 +1,22 @@
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore, ACCESS_TOKEN, getTokenFromStorage } from '@/stores/authStore';
 import { useSignOut } from '@/features/auth/data/auth';
+import { useEffect, useState } from 'react';
 
 export default function LandingPage() {
-  const auth = useAuthStore((state) => state.auth);
-  const isLoggedIn = !!auth.accessToken;
+  const [loggedIn, setLoggedIn] = useState(false);
+  const authState = useAuthStore();
+  const auth = authState.auth;
   const signOut = useSignOut();
+
+  // Check auth state on mount and when authState changes
+  useEffect(() => {
+    const token = getTokenFromStorage();
+    console.log('LandingPage: token from storage:', token ? 'exists' : 'none');
+    console.log('LandingPage: auth.accessToken:', auth.accessToken ? 'exists' : 'none');
+    setLoggedIn(!!auth.accessToken || !!token);
+  }, [auth.accessToken, authState]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
@@ -19,7 +29,7 @@ export default function LandingPage() {
         <nav className="flex items-center gap-6">
           <a href="#features" className="text-slate-300 hover:text-white transition-colors">功能</a>
           <a href="#pricing" className="text-slate-300 hover:text-white transition-colors">定价</a>
-          {isLoggedIn ? (
+          {loggedIn ? (
             <>
               <span className="text-slate-300">
                 欢迎，{auth.user?.firstName || auth.user?.email || '用户'}
