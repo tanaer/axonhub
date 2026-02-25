@@ -31,6 +31,8 @@ type Handlers struct {
 	Codex          *api.CodexHandlers
 	ClaudeCode     *api.ClaudeCodeHandlers
 	Antigravity    *api.AntigravityHandlers
+	OAuth          *api.OAuthHandler
+	UserQuota      *api.UserQuotaHandler
 }
 
 type Services struct {
@@ -73,6 +75,19 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 		publicGroup.GET("/health", handlers.System.Health)
 	}
 
+	// OAuth routes - public (matching frontend expectations)
+	oauthGroup := server.Group("/api/auth/oauth", middleware.WithTimeout(server.Config.RequestTimeout))
+	{
+		oauthGroup.GET("/google", handlers.OAuth.GoogleLogin)
+		oauthGroup.GET("/github", handlers.OAuth.GitHubLogin)
+	}
+	
+	// OAuth callback route
+	server.GET("/auth/callback", middleware.WithTimeout(server.Config.RequestTimeout), handlers.OAuth.Callback)
+	server.GET("/auth/providers", middleware.WithTimeout(server.Config.RequestTimeout), handlers.OAuth.GetProviders)
+	server.GET("/auth/verify", middleware.WithTimeout(server.Config.RequestTimeout), handlers.OAuth.VerifyToken)
+	server.POST("/auth/logout", middleware.WithTimeout(server.Config.RequestTimeout), handlers.OAuth.Logout)
+
 	unSecureAdminGroup := server.Group("/admin", middleware.WithTimeout(server.Config.RequestTimeout))
 	{
 		// System Status and Initialize - DO NOT AUTH
@@ -80,6 +95,10 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 		unSecureAdminGroup.POST("/system/initialize", handlers.System.InitializeSystem)
 		// User Login - DO NOT AUTH
 		unSecureAdminGroup.POST("/auth/signin", handlers.Auth.SignIn)
+		// User Registration - DO NOT AUTH
+		unSecureAdminGroup.POST("/auth/signup", handlers.Auth.SignUp)
+		// Forgot Password - DO NOT AUTH
+		unSecureAdminGroup.POST("/auth/forgot-password", handlers.Auth.ForgotPassword)
 	}
 
 	adminGroup := server.Group("/admin", middleware.WithJWTAuth(services.AuthService), middleware.WithProjectID())
@@ -108,6 +127,11 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 			middleware.WithSource(request.SourcePlayground),
 			handlers.Playground.ChatCompletion,
 		)
+
+		// User Quota API
+		adminGroup.GET("/quota/me", handlers.UserQuota.GetMyQuota)
+		adminGroup.GET("/quota/transactions", handlers.UserQuota.GetTransactionHistory)
+		adminGroup.POST("/quota/recharge", handlers.UserQuota.Recharge)
 	}
 
 	openAPIGroup := server.Group("/openapi", middleware.WithOpenAPIAuth(services.AuthService), middleware.WithTimeout(server.Config.RequestTimeout))

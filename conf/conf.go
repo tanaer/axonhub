@@ -32,6 +32,16 @@ type Config struct {
 	GC            gc.Config           `conf:"gc" yaml:"gc" json:"gc"`
 	Cache         xcache.Config       `conf:"cache" yaml:"cache" json:"cache"`
 	ProviderQuota providerQuotaConfig `conf:"provider_quota" yaml:"provider_quota" json:"provider_quota"`
+	OAuth         OAuthConfig         `conf:"oauth" yaml:"oauth" json:"oauth"`
+}
+
+type OAuthConfig struct {
+	GoogleClientID     string `conf:"google_client_id" yaml:"google_client_id" json:"google_client_id"`
+	GoogleClientSecret string `conf:"google_client_secret" yaml:"google_client_secret" json:"google_client_secret"`
+	GitHubClientID     string `conf:"github_client_id" yaml:"github_client_id" json:"github_client_id"`
+	GitHubClientSecret string `conf:"github_client_secret" yaml:"github_client_secret" json:"github_client_secret"`
+	JWTSecret          string `conf:"jwt_secret" yaml:"jwt_secret" json:"jwt_secret"`
+	URL                string `conf:"url" yaml:"url" json:"url"`
 }
 
 type providerQuotaConfig struct {

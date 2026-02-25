@@ -21,16 +21,20 @@ import (
 	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
+	"github.com/looplj/axonhub/internal/ent/quotatransaction"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
+	"github.com/looplj/axonhub/internal/ent/subscriptionplan"
 	"github.com/looplj/axonhub/internal/ent/system"
 	"github.com/looplj/axonhub/internal/ent/thread"
 	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
 	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/ent/userproject"
+	"github.com/looplj/axonhub/internal/ent/userquota"
 	"github.com/looplj/axonhub/internal/ent/userrole"
+	"github.com/looplj/axonhub/internal/ent/usersubscription"
 )
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
@@ -3032,6 +3036,135 @@ func newProviderQuotaStatusPaginateArgs(rv map[string]any) *providerquotastatusP
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (_q *QuotaTransactionQuery) CollectFields(ctx context.Context, satisfies ...string) (*QuotaTransactionQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return _q, nil
+	}
+	if err := _q.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return _q, nil
+}
+
+func (_q *QuotaTransactionQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(quotatransaction.Columns))
+		selectedFields = []string{quotatransaction.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "createdAt":
+			if _, ok := fieldSeen[quotatransaction.FieldCreatedAt]; !ok {
+				selectedFields = append(selectedFields, quotatransaction.FieldCreatedAt)
+				fieldSeen[quotatransaction.FieldCreatedAt] = struct{}{}
+			}
+		case "updatedAt":
+			if _, ok := fieldSeen[quotatransaction.FieldUpdatedAt]; !ok {
+				selectedFields = append(selectedFields, quotatransaction.FieldUpdatedAt)
+				fieldSeen[quotatransaction.FieldUpdatedAt] = struct{}{}
+			}
+		case "userID":
+			if _, ok := fieldSeen[quotatransaction.FieldUserID]; !ok {
+				selectedFields = append(selectedFields, quotatransaction.FieldUserID)
+				fieldSeen[quotatransaction.FieldUserID] = struct{}{}
+			}
+		case "type":
+			if _, ok := fieldSeen[quotatransaction.FieldType]; !ok {
+				selectedFields = append(selectedFields, quotatransaction.FieldType)
+				fieldSeen[quotatransaction.FieldType] = struct{}{}
+			}
+		case "amount":
+			if _, ok := fieldSeen[quotatransaction.FieldAmount]; !ok {
+				selectedFields = append(selectedFields, quotatransaction.FieldAmount)
+				fieldSeen[quotatransaction.FieldAmount] = struct{}{}
+			}
+		case "balanceAfter":
+			if _, ok := fieldSeen[quotatransaction.FieldBalanceAfter]; !ok {
+				selectedFields = append(selectedFields, quotatransaction.FieldBalanceAfter)
+				fieldSeen[quotatransaction.FieldBalanceAfter] = struct{}{}
+			}
+		case "description":
+			if _, ok := fieldSeen[quotatransaction.FieldDescription]; !ok {
+				selectedFields = append(selectedFields, quotatransaction.FieldDescription)
+				fieldSeen[quotatransaction.FieldDescription] = struct{}{}
+			}
+		case "orderID":
+			if _, ok := fieldSeen[quotatransaction.FieldOrderID]; !ok {
+				selectedFields = append(selectedFields, quotatransaction.FieldOrderID)
+				fieldSeen[quotatransaction.FieldOrderID] = struct{}{}
+			}
+		case "status":
+			if _, ok := fieldSeen[quotatransaction.FieldStatus]; !ok {
+				selectedFields = append(selectedFields, quotatransaction.FieldStatus)
+				fieldSeen[quotatransaction.FieldStatus] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		_q.Select(selectedFields...)
+	}
+	return nil
+}
+
+type quotatransactionPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []QuotaTransactionPaginateOption
+}
+
+func newQuotaTransactionPaginateArgs(rv map[string]any) *quotatransactionPaginateArgs {
+	args := &quotatransactionPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[orderByField]; ok {
+		switch v := v.(type) {
+		case map[string]any:
+			var (
+				err1, err2 error
+				order      = &QuotaTransactionOrder{Field: &QuotaTransactionOrderField{}, Direction: entgql.OrderDirectionAsc}
+			)
+			if d, ok := v[directionField]; ok {
+				err1 = order.Direction.UnmarshalGQL(d)
+			}
+			if f, ok := v[fieldField]; ok {
+				err2 = order.Field.UnmarshalGQL(f)
+			}
+			if err1 == nil && err2 == nil {
+				args.opts = append(args.opts, WithQuotaTransactionOrder(order))
+			}
+		case *QuotaTransactionOrder:
+			if v != nil {
+				args.opts = append(args.opts, WithQuotaTransactionOrder(v))
+			}
+		}
+	}
+	if v, ok := rv[whereField].(*QuotaTransactionWhereInput); ok {
+		args.opts = append(args.opts, WithQuotaTransactionFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
 func (_q *RequestQuery) CollectFields(ctx context.Context, satisfies ...string) (*RequestQuery, error) {
 	fc := graphql.GetFieldContext(ctx)
 	if fc == nil {
@@ -3994,6 +4127,150 @@ func newRolePaginateArgs(rv map[string]any) *rolePaginateArgs {
 	}
 	if v, ok := rv[whereField].(*RoleWhereInput); ok {
 		args.opts = append(args.opts, WithRoleFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (_q *SubscriptionPlanQuery) CollectFields(ctx context.Context, satisfies ...string) (*SubscriptionPlanQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return _q, nil
+	}
+	if err := _q.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return _q, nil
+}
+
+func (_q *SubscriptionPlanQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(subscriptionplan.Columns))
+		selectedFields = []string{subscriptionplan.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "createdAt":
+			if _, ok := fieldSeen[subscriptionplan.FieldCreatedAt]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldCreatedAt)
+				fieldSeen[subscriptionplan.FieldCreatedAt] = struct{}{}
+			}
+		case "updatedAt":
+			if _, ok := fieldSeen[subscriptionplan.FieldUpdatedAt]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldUpdatedAt)
+				fieldSeen[subscriptionplan.FieldUpdatedAt] = struct{}{}
+			}
+		case "name":
+			if _, ok := fieldSeen[subscriptionplan.FieldName]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldName)
+				fieldSeen[subscriptionplan.FieldName] = struct{}{}
+			}
+		case "displayName":
+			if _, ok := fieldSeen[subscriptionplan.FieldDisplayName]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldDisplayName)
+				fieldSeen[subscriptionplan.FieldDisplayName] = struct{}{}
+			}
+		case "price":
+			if _, ok := fieldSeen[subscriptionplan.FieldPrice]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldPrice)
+				fieldSeen[subscriptionplan.FieldPrice] = struct{}{}
+			}
+		case "currency":
+			if _, ok := fieldSeen[subscriptionplan.FieldCurrency]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldCurrency)
+				fieldSeen[subscriptionplan.FieldCurrency] = struct{}{}
+			}
+		case "quota":
+			if _, ok := fieldSeen[subscriptionplan.FieldQuota]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldQuota)
+				fieldSeen[subscriptionplan.FieldQuota] = struct{}{}
+			}
+		case "durationDays":
+			if _, ok := fieldSeen[subscriptionplan.FieldDurationDays]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldDurationDays)
+				fieldSeen[subscriptionplan.FieldDurationDays] = struct{}{}
+			}
+		case "features":
+			if _, ok := fieldSeen[subscriptionplan.FieldFeatures]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldFeatures)
+				fieldSeen[subscriptionplan.FieldFeatures] = struct{}{}
+			}
+		case "isPopular":
+			if _, ok := fieldSeen[subscriptionplan.FieldIsPopular]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldIsPopular)
+				fieldSeen[subscriptionplan.FieldIsPopular] = struct{}{}
+			}
+		case "sortOrder":
+			if _, ok := fieldSeen[subscriptionplan.FieldSortOrder]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldSortOrder)
+				fieldSeen[subscriptionplan.FieldSortOrder] = struct{}{}
+			}
+		case "status":
+			if _, ok := fieldSeen[subscriptionplan.FieldStatus]; !ok {
+				selectedFields = append(selectedFields, subscriptionplan.FieldStatus)
+				fieldSeen[subscriptionplan.FieldStatus] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		_q.Select(selectedFields...)
+	}
+	return nil
+}
+
+type subscriptionplanPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []SubscriptionPlanPaginateOption
+}
+
+func newSubscriptionPlanPaginateArgs(rv map[string]any) *subscriptionplanPaginateArgs {
+	args := &subscriptionplanPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[orderByField]; ok {
+		switch v := v.(type) {
+		case map[string]any:
+			var (
+				err1, err2 error
+				order      = &SubscriptionPlanOrder{Field: &SubscriptionPlanOrderField{}, Direction: entgql.OrderDirectionAsc}
+			)
+			if d, ok := v[directionField]; ok {
+				err1 = order.Direction.UnmarshalGQL(d)
+			}
+			if f, ok := v[fieldField]; ok {
+				err2 = order.Field.UnmarshalGQL(f)
+			}
+			if err1 == nil && err2 == nil {
+				args.opts = append(args.opts, WithSubscriptionPlanOrder(order))
+			}
+		case *SubscriptionPlanOrder:
+			if v != nil {
+				args.opts = append(args.opts, WithSubscriptionPlanOrder(v))
+			}
+		}
+	}
+	if v, ok := rv[whereField].(*SubscriptionPlanWhereInput); ok {
+		args.opts = append(args.opts, WithSubscriptionPlanFilter(v.Filter))
 	}
 	return args
 }
@@ -5608,6 +5885,140 @@ func newUserProjectPaginateArgs(rv map[string]any) *userprojectPaginateArgs {
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (_q *UserQuotaQuery) CollectFields(ctx context.Context, satisfies ...string) (*UserQuotaQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return _q, nil
+	}
+	if err := _q.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return _q, nil
+}
+
+func (_q *UserQuotaQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(userquota.Columns))
+		selectedFields = []string{userquota.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "createdAt":
+			if _, ok := fieldSeen[userquota.FieldCreatedAt]; !ok {
+				selectedFields = append(selectedFields, userquota.FieldCreatedAt)
+				fieldSeen[userquota.FieldCreatedAt] = struct{}{}
+			}
+		case "updatedAt":
+			if _, ok := fieldSeen[userquota.FieldUpdatedAt]; !ok {
+				selectedFields = append(selectedFields, userquota.FieldUpdatedAt)
+				fieldSeen[userquota.FieldUpdatedAt] = struct{}{}
+			}
+		case "userID":
+			if _, ok := fieldSeen[userquota.FieldUserID]; !ok {
+				selectedFields = append(selectedFields, userquota.FieldUserID)
+				fieldSeen[userquota.FieldUserID] = struct{}{}
+			}
+		case "quota":
+			if _, ok := fieldSeen[userquota.FieldQuota]; !ok {
+				selectedFields = append(selectedFields, userquota.FieldQuota)
+				fieldSeen[userquota.FieldQuota] = struct{}{}
+			}
+		case "usedQuota":
+			if _, ok := fieldSeen[userquota.FieldUsedQuota]; !ok {
+				selectedFields = append(selectedFields, userquota.FieldUsedQuota)
+				fieldSeen[userquota.FieldUsedQuota] = struct{}{}
+			}
+		case "group":
+			if _, ok := fieldSeen[userquota.FieldGroup]; !ok {
+				selectedFields = append(selectedFields, userquota.FieldGroup)
+				fieldSeen[userquota.FieldGroup] = struct{}{}
+			}
+		case "affCode":
+			if _, ok := fieldSeen[userquota.FieldAffCode]; !ok {
+				selectedFields = append(selectedFields, userquota.FieldAffCode)
+				fieldSeen[userquota.FieldAffCode] = struct{}{}
+			}
+		case "inviterID":
+			if _, ok := fieldSeen[userquota.FieldInviterID]; !ok {
+				selectedFields = append(selectedFields, userquota.FieldInviterID)
+				fieldSeen[userquota.FieldInviterID] = struct{}{}
+			}
+		case "notify":
+			if _, ok := fieldSeen[userquota.FieldNotify]; !ok {
+				selectedFields = append(selectedFields, userquota.FieldNotify)
+				fieldSeen[userquota.FieldNotify] = struct{}{}
+			}
+		case "quotaRemindThreshold":
+			if _, ok := fieldSeen[userquota.FieldQuotaRemindThreshold]; !ok {
+				selectedFields = append(selectedFields, userquota.FieldQuotaRemindThreshold)
+				fieldSeen[userquota.FieldQuotaRemindThreshold] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		_q.Select(selectedFields...)
+	}
+	return nil
+}
+
+type userquotaPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []UserQuotaPaginateOption
+}
+
+func newUserQuotaPaginateArgs(rv map[string]any) *userquotaPaginateArgs {
+	args := &userquotaPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[orderByField]; ok {
+		switch v := v.(type) {
+		case map[string]any:
+			var (
+				err1, err2 error
+				order      = &UserQuotaOrder{Field: &UserQuotaOrderField{}, Direction: entgql.OrderDirectionAsc}
+			)
+			if d, ok := v[directionField]; ok {
+				err1 = order.Direction.UnmarshalGQL(d)
+			}
+			if f, ok := v[fieldField]; ok {
+				err2 = order.Field.UnmarshalGQL(f)
+			}
+			if err1 == nil && err2 == nil {
+				args.opts = append(args.opts, WithUserQuotaOrder(order))
+			}
+		case *UserQuotaOrder:
+			if v != nil {
+				args.opts = append(args.opts, WithUserQuotaOrder(v))
+			}
+		}
+	}
+	if v, ok := rv[whereField].(*UserQuotaWhereInput); ok {
+		args.opts = append(args.opts, WithUserQuotaFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
 func (_q *UserRoleQuery) CollectFields(ctx context.Context, satisfies ...string) (*UserRoleQuery, error) {
 	fc := graphql.GetFieldContext(ctx)
 	if fc == nil {
@@ -5737,6 +6148,130 @@ func newUserRolePaginateArgs(rv map[string]any) *userrolePaginateArgs {
 	}
 	if v, ok := rv[whereField].(*UserRoleWhereInput); ok {
 		args.opts = append(args.opts, WithUserRoleFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (_q *UserSubscriptionQuery) CollectFields(ctx context.Context, satisfies ...string) (*UserSubscriptionQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return _q, nil
+	}
+	if err := _q.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return _q, nil
+}
+
+func (_q *UserSubscriptionQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(usersubscription.Columns))
+		selectedFields = []string{usersubscription.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "createdAt":
+			if _, ok := fieldSeen[usersubscription.FieldCreatedAt]; !ok {
+				selectedFields = append(selectedFields, usersubscription.FieldCreatedAt)
+				fieldSeen[usersubscription.FieldCreatedAt] = struct{}{}
+			}
+		case "updatedAt":
+			if _, ok := fieldSeen[usersubscription.FieldUpdatedAt]; !ok {
+				selectedFields = append(selectedFields, usersubscription.FieldUpdatedAt)
+				fieldSeen[usersubscription.FieldUpdatedAt] = struct{}{}
+			}
+		case "userID":
+			if _, ok := fieldSeen[usersubscription.FieldUserID]; !ok {
+				selectedFields = append(selectedFields, usersubscription.FieldUserID)
+				fieldSeen[usersubscription.FieldUserID] = struct{}{}
+			}
+		case "planID":
+			if _, ok := fieldSeen[usersubscription.FieldPlanID]; !ok {
+				selectedFields = append(selectedFields, usersubscription.FieldPlanID)
+				fieldSeen[usersubscription.FieldPlanID] = struct{}{}
+			}
+		case "quotaRemaining":
+			if _, ok := fieldSeen[usersubscription.FieldQuotaRemaining]; !ok {
+				selectedFields = append(selectedFields, usersubscription.FieldQuotaRemaining)
+				fieldSeen[usersubscription.FieldQuotaRemaining] = struct{}{}
+			}
+		case "expiresAt":
+			if _, ok := fieldSeen[usersubscription.FieldExpiresAt]; !ok {
+				selectedFields = append(selectedFields, usersubscription.FieldExpiresAt)
+				fieldSeen[usersubscription.FieldExpiresAt] = struct{}{}
+			}
+		case "status":
+			if _, ok := fieldSeen[usersubscription.FieldStatus]; !ok {
+				selectedFields = append(selectedFields, usersubscription.FieldStatus)
+				fieldSeen[usersubscription.FieldStatus] = struct{}{}
+			}
+		case "orderID":
+			if _, ok := fieldSeen[usersubscription.FieldOrderID]; !ok {
+				selectedFields = append(selectedFields, usersubscription.FieldOrderID)
+				fieldSeen[usersubscription.FieldOrderID] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		_q.Select(selectedFields...)
+	}
+	return nil
+}
+
+type usersubscriptionPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []UserSubscriptionPaginateOption
+}
+
+func newUserSubscriptionPaginateArgs(rv map[string]any) *usersubscriptionPaginateArgs {
+	args := &usersubscriptionPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[orderByField]; ok {
+		switch v := v.(type) {
+		case map[string]any:
+			var (
+				err1, err2 error
+				order      = &UserSubscriptionOrder{Field: &UserSubscriptionOrderField{}, Direction: entgql.OrderDirectionAsc}
+			)
+			if d, ok := v[directionField]; ok {
+				err1 = order.Direction.UnmarshalGQL(d)
+			}
+			if f, ok := v[fieldField]; ok {
+				err2 = order.Field.UnmarshalGQL(f)
+			}
+			if err1 == nil && err2 == nil {
+				args.opts = append(args.opts, WithUserSubscriptionOrder(order))
+			}
+		case *UserSubscriptionOrder:
+			if v != nil {
+				args.opts = append(args.opts, WithUserSubscriptionOrder(v))
+			}
+		}
+	}
+	if v, ok := rv[whereField].(*UserSubscriptionWhereInput); ok {
+		args.opts = append(args.opts, WithUserSubscriptionFilter(v.Filter))
 	}
 	return args
 }

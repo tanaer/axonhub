@@ -39,6 +39,9 @@ type Prompt func(*sql.Selector)
 // ProviderQuotaStatus is the predicate function for providerquotastatus builders.
 type ProviderQuotaStatus func(*sql.Selector)
 
+// QuotaTransaction is the predicate function for quotatransaction builders.
+type QuotaTransaction func(*sql.Selector)
+
 // Request is the predicate function for request builders.
 type Request func(*sql.Selector)
 
@@ -47,6 +50,9 @@ type RequestExecution func(*sql.Selector)
 
 // Role is the predicate function for role builders.
 type Role func(*sql.Selector)
+
+// SubscriptionPlan is the predicate function for subscriptionplan builders.
+type SubscriptionPlan func(*sql.Selector)
 
 // System is the predicate function for system builders.
 type System func(*sql.Selector)
@@ -66,5 +72,11 @@ type User func(*sql.Selector)
 // UserProject is the predicate function for userproject builders.
 type UserProject func(*sql.Selector)
 
+// UserQuota is the predicate function for userquota builders.
+type UserQuota func(*sql.Selector)
+
 // UserRole is the predicate function for userrole builders.
 type UserRole func(*sql.Selector)
+
+// UserSubscription is the predicate function for usersubscription builders.
+type UserSubscription func(*sql.Selector)

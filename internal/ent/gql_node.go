@@ -25,16 +25,20 @@ import (
 	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
+	"github.com/looplj/axonhub/internal/ent/quotatransaction"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
+	"github.com/looplj/axonhub/internal/ent/subscriptionplan"
 	"github.com/looplj/axonhub/internal/ent/system"
 	"github.com/looplj/axonhub/internal/ent/thread"
 	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
 	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/ent/userproject"
+	"github.com/looplj/axonhub/internal/ent/userquota"
 	"github.com/looplj/axonhub/internal/ent/userrole"
+	"github.com/looplj/axonhub/internal/ent/usersubscription"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -99,6 +103,11 @@ var providerquotastatusImplementors = []string{"ProviderQuotaStatus", "Node"}
 // IsNode implements the Node interface check for GQLGen.
 func (*ProviderQuotaStatus) IsNode() {}
 
+var quotatransactionImplementors = []string{"QuotaTransaction", "Node"}
+
+// IsNode implements the Node interface check for GQLGen.
+func (*QuotaTransaction) IsNode() {}
+
 var requestImplementors = []string{"Request", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
@@ -113,6 +122,11 @@ var roleImplementors = []string{"Role", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
 func (*Role) IsNode() {}
+
+var subscriptionplanImplementors = []string{"SubscriptionPlan", "Node"}
+
+// IsNode implements the Node interface check for GQLGen.
+func (*SubscriptionPlan) IsNode() {}
 
 var systemImplementors = []string{"System", "Node"}
 
@@ -144,10 +158,20 @@ var userprojectImplementors = []string{"UserProject", "Node"}
 // IsNode implements the Node interface check for GQLGen.
 func (*UserProject) IsNode() {}
 
+var userquotaImplementors = []string{"UserQuota", "Node"}
+
+// IsNode implements the Node interface check for GQLGen.
+func (*UserQuota) IsNode() {}
+
 var userroleImplementors = []string{"UserRole", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
 func (*UserRole) IsNode() {}
+
+var usersubscriptionImplementors = []string{"UserSubscription", "Node"}
+
+// IsNode implements the Node interface check for GQLGen.
+func (*UserSubscription) IsNode() {}
 
 var errNodeInvalidID = &NotFoundError{"node"}
 
@@ -306,6 +330,15 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			}
 		}
 		return query.Only(ctx)
+	case quotatransaction.Table:
+		query := c.QuotaTransaction.Query().
+			Where(quotatransaction.ID(id))
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, quotatransactionImplementors...); err != nil {
+				return nil, err
+			}
+		}
+		return query.Only(ctx)
 	case request.Table:
 		query := c.Request.Query().
 			Where(request.ID(id))
@@ -329,6 +362,15 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			Where(role.ID(id))
 		if fc := graphql.GetFieldContext(ctx); fc != nil {
 			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, roleImplementors...); err != nil {
+				return nil, err
+			}
+		}
+		return query.Only(ctx)
+	case subscriptionplan.Table:
+		query := c.SubscriptionPlan.Query().
+			Where(subscriptionplan.ID(id))
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, subscriptionplanImplementors...); err != nil {
 				return nil, err
 			}
 		}
@@ -387,11 +429,29 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			}
 		}
 		return query.Only(ctx)
+	case userquota.Table:
+		query := c.UserQuota.Query().
+			Where(userquota.ID(id))
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, userquotaImplementors...); err != nil {
+				return nil, err
+			}
+		}
+		return query.Only(ctx)
 	case userrole.Table:
 		query := c.UserRole.Query().
 			Where(userrole.ID(id))
 		if fc := graphql.GetFieldContext(ctx); fc != nil {
 			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, userroleImplementors...); err != nil {
+				return nil, err
+			}
+		}
+		return query.Only(ctx)
+	case usersubscription.Table:
+		query := c.UserSubscription.Query().
+			Where(usersubscription.ID(id))
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, usersubscriptionImplementors...); err != nil {
 				return nil, err
 			}
 		}
@@ -645,6 +705,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
+	case quotatransaction.Table:
+		query := c.QuotaTransaction.Query().
+			Where(quotatransaction.IDIn(ids...))
+		query, err := query.CollectFields(ctx, quotatransactionImplementors...)
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
 	case request.Table:
 		query := c.Request.Query().
 			Where(request.IDIn(ids...))
@@ -681,6 +757,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.Role.Query().
 			Where(role.IDIn(ids...))
 		query, err := query.CollectFields(ctx, roleImplementors...)
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case subscriptionplan.Table:
+		query := c.SubscriptionPlan.Query().
+			Where(subscriptionplan.IDIn(ids...))
+		query, err := query.CollectFields(ctx, subscriptionplanImplementors...)
 		if err != nil {
 			return nil, err
 		}
@@ -789,10 +881,42 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
+	case userquota.Table:
+		query := c.UserQuota.Query().
+			Where(userquota.IDIn(ids...))
+		query, err := query.CollectFields(ctx, userquotaImplementors...)
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
 	case userrole.Table:
 		query := c.UserRole.Query().
 			Where(userrole.IDIn(ids...))
 		query, err := query.CollectFields(ctx, userroleImplementors...)
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case usersubscription.Table:
+		query := c.UserSubscription.Query().
+			Where(usersubscription.IDIn(ids...))
+		query, err := query.CollectFields(ctx, usersubscriptionImplementors...)
 		if err != nil {
 			return nil, err
 		}

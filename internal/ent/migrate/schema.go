@@ -379,6 +379,25 @@ var (
 			},
 		},
 	}
+	// QuotaTransactionsColumns holds the columns for the "quota_transactions" table.
+	QuotaTransactionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"recharge", "consume", "refund", "reward"}},
+		{Name: "amount", Type: field.TypeInt64},
+		{Name: "balance_after", Type: field.TypeInt64},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "order_id", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "completed", "failed"}, Default: "completed"},
+	}
+	// QuotaTransactionsTable holds the schema information for the "quota_transactions" table.
+	QuotaTransactionsTable = &schema.Table{
+		Name:       "quota_transactions",
+		Columns:    QuotaTransactionsColumns,
+		PrimaryKey: []*schema.Column{QuotaTransactionsColumns[0]},
+	}
 	// RequestsColumns holds the columns for the "requests" table.
 	RequestsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -564,6 +583,29 @@ var (
 				Columns: []*schema.Column{RolesColumns[5]},
 			},
 		},
+	}
+	// SubscriptionPlansColumns holds the columns for the "subscription_plans" table.
+	SubscriptionPlansColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeInt, Default: 0},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "display_name", Type: field.TypeString},
+		{Name: "price", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString, Default: "CNY"},
+		{Name: "quota", Type: field.TypeInt64},
+		{Name: "duration_days", Type: field.TypeInt64},
+		{Name: "features", Type: field.TypeJSON, Nullable: true},
+		{Name: "is_popular", Type: field.TypeBool, Default: false},
+		{Name: "sort_order", Type: field.TypeInt, Default: 0},
+		{Name: "status", Type: field.TypeBool, Default: true},
+	}
+	// SubscriptionPlansTable holds the schema information for the "subscription_plans" table.
+	SubscriptionPlansTable = &schema.Table{
+		Name:       "subscription_plans",
+		Columns:    SubscriptionPlansColumns,
+		PrimaryKey: []*schema.Column{SubscriptionPlansColumns[0]},
 	}
 	// SystemsColumns holds the columns for the "systems" table.
 	SystemsColumns = []*schema.Column{
@@ -810,6 +852,38 @@ var (
 			},
 		},
 	}
+	// UserQuotaColumns holds the columns for the "user_quota" table.
+	UserQuotaColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeInt, Unique: true},
+		{Name: "quota", Type: field.TypeInt64, Default: 0},
+		{Name: "used_quota", Type: field.TypeInt64, Default: 0},
+		{Name: "group", Type: field.TypeString, Default: "default"},
+		{Name: "aff_code", Type: field.TypeString, Nullable: true},
+		{Name: "inviter_id", Type: field.TypeInt, Nullable: true},
+		{Name: "notify", Type: field.TypeBool, Default: true},
+		{Name: "quota_remind_threshold", Type: field.TypeInt64, Default: 100000},
+	}
+	// UserQuotaTable holds the schema information for the "user_quota" table.
+	UserQuotaTable = &schema.Table{
+		Name:       "user_quota",
+		Columns:    UserQuotaColumns,
+		PrimaryKey: []*schema.Column{UserQuotaColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "userquota_aff_code",
+				Unique:  true,
+				Columns: []*schema.Column{UserQuotaColumns[7]},
+			},
+			{
+				Name:    "userquota_group",
+				Unique:  false,
+				Columns: []*schema.Column{UserQuotaColumns[6]},
+			},
+		},
+	}
 	// UserRolesColumns holds the columns for the "user_roles" table.
 	UserRolesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -850,6 +924,24 @@ var (
 			},
 		},
 	}
+	// UserSubscriptionsColumns holds the columns for the "user_subscriptions" table.
+	UserSubscriptionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "plan_id", Type: field.TypeInt},
+		{Name: "quota_remaining", Type: field.TypeInt64},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "expired", "cancelled"}, Default: "active"},
+		{Name: "order_id", Type: field.TypeString, Nullable: true},
+	}
+	// UserSubscriptionsTable holds the schema information for the "user_subscriptions" table.
+	UserSubscriptionsTable = &schema.Table{
+		Name:       "user_subscriptions",
+		Columns:    UserSubscriptionsColumns,
+		PrimaryKey: []*schema.Column{UserSubscriptionsColumns[0]},
+	}
 	// ProjectPromptsColumns holds the columns for the "project_prompts" table.
 	ProjectPromptsColumns = []*schema.Column{
 		{Name: "project_id", Type: field.TypeInt},
@@ -888,16 +980,20 @@ var (
 		ProjectsTable,
 		PromptsTable,
 		ProviderQuotaStatusTable,
+		QuotaTransactionsTable,
 		RequestsTable,
 		RequestExecutionsTable,
 		RolesTable,
+		SubscriptionPlansTable,
 		SystemsTable,
 		ThreadsTable,
 		TracesTable,
 		UsageLogsTable,
 		UsersTable,
 		UserProjectsTable,
+		UserQuotaTable,
 		UserRolesTable,
+		UserSubscriptionsTable,
 		ProjectPromptsTable,
 	}
 )

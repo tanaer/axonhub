@@ -126,6 +126,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
         {/* Social Login Buttons */}
         <SocialLoginButtons />
+
+        {/* Sign Up Link */}
+        <div className="text-center text-sm text-slate-600">
+          还没有账号？{' '}
+          <Link
+            to='/sign-up'
+            className='font-medium text-indigo-600 transition-colors hover:text-indigo-500 hover:underline'
+          >
+            立即注册
+          </Link>
+        </div>
       </form>
     </Form>
   );

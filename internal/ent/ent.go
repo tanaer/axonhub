@@ -23,16 +23,20 @@ import (
 	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
+	"github.com/looplj/axonhub/internal/ent/quotatransaction"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
+	"github.com/looplj/axonhub/internal/ent/subscriptionplan"
 	"github.com/looplj/axonhub/internal/ent/system"
 	"github.com/looplj/axonhub/internal/ent/thread"
 	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
 	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/ent/userproject"
+	"github.com/looplj/axonhub/internal/ent/userquota"
 	"github.com/looplj/axonhub/internal/ent/userrole"
+	"github.com/looplj/axonhub/internal/ent/usersubscription"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -104,16 +108,20 @@ func checkColumn(t, c string) error {
 			project.Table:                  project.ValidColumn,
 			prompt.Table:                   prompt.ValidColumn,
 			providerquotastatus.Table:      providerquotastatus.ValidColumn,
+			quotatransaction.Table:         quotatransaction.ValidColumn,
 			request.Table:                  request.ValidColumn,
 			requestexecution.Table:         requestexecution.ValidColumn,
 			role.Table:                     role.ValidColumn,
+			subscriptionplan.Table:         subscriptionplan.ValidColumn,
 			system.Table:                   system.ValidColumn,
 			thread.Table:                   thread.ValidColumn,
 			trace.Table:                    trace.ValidColumn,
 			usagelog.Table:                 usagelog.ValidColumn,
 			user.Table:                     user.ValidColumn,
 			userproject.Table:              userproject.ValidColumn,
+			userquota.Table:                userquota.ValidColumn,
 			userrole.Table:                 userrole.ValidColumn,
+			usersubscription.Table:         usersubscription.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

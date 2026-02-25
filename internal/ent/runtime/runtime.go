@@ -16,17 +16,21 @@ import (
 	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
+	"github.com/looplj/axonhub/internal/ent/quotatransaction"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
 	"github.com/looplj/axonhub/internal/ent/schema"
+	"github.com/looplj/axonhub/internal/ent/subscriptionplan"
 	"github.com/looplj/axonhub/internal/ent/system"
 	"github.com/looplj/axonhub/internal/ent/thread"
 	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
 	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/ent/userproject"
+	"github.com/looplj/axonhub/internal/ent/userquota"
 	"github.com/looplj/axonhub/internal/ent/userrole"
+	"github.com/looplj/axonhub/internal/ent/usersubscription"
 	"github.com/looplj/axonhub/internal/objects"
 
 	"entgo.io/ent"
@@ -446,6 +450,21 @@ func init() {
 	providerquotastatusDescReady := providerquotastatusFields[5].Descriptor()
 	// providerquotastatus.DefaultReady holds the default value on creation for the ready field.
 	providerquotastatus.DefaultReady = providerquotastatusDescReady.Default.(bool)
+	quotatransactionMixin := schema.QuotaTransaction{}.Mixin()
+	quotatransactionMixinFields0 := quotatransactionMixin[0].Fields()
+	_ = quotatransactionMixinFields0
+	quotatransactionFields := schema.QuotaTransaction{}.Fields()
+	_ = quotatransactionFields
+	// quotatransactionDescCreatedAt is the schema descriptor for created_at field.
+	quotatransactionDescCreatedAt := quotatransactionMixinFields0[0].Descriptor()
+	// quotatransaction.DefaultCreatedAt holds the default value on creation for the created_at field.
+	quotatransaction.DefaultCreatedAt = quotatransactionDescCreatedAt.Default.(func() time.Time)
+	// quotatransactionDescUpdatedAt is the schema descriptor for updated_at field.
+	quotatransactionDescUpdatedAt := quotatransactionMixinFields0[1].Descriptor()
+	// quotatransaction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	quotatransaction.DefaultUpdatedAt = quotatransactionDescUpdatedAt.Default.(func() time.Time)
+	// quotatransaction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	quotatransaction.UpdateDefaultUpdatedAt = quotatransactionDescUpdatedAt.UpdateDefault.(func() time.Time)
 	requestMixin := schema.Request{}.Mixin()
 	request.Policy = privacy.NewPolicies(schema.Request{})
 	request.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -552,6 +571,47 @@ func init() {
 	roleDescScopes := roleFields[3].Descriptor()
 	// role.DefaultScopes holds the default value on creation for the scopes field.
 	role.DefaultScopes = roleDescScopes.Default.([]string)
+	subscriptionplanMixin := schema.SubscriptionPlan{}.Mixin()
+	subscriptionplanMixinHooks1 := subscriptionplanMixin[1].Hooks()
+	subscriptionplan.Hooks[0] = subscriptionplanMixinHooks1[0]
+	subscriptionplanMixinInters1 := subscriptionplanMixin[1].Interceptors()
+	subscriptionplan.Interceptors[0] = subscriptionplanMixinInters1[0]
+	subscriptionplanMixinFields0 := subscriptionplanMixin[0].Fields()
+	_ = subscriptionplanMixinFields0
+	subscriptionplanMixinFields1 := subscriptionplanMixin[1].Fields()
+	_ = subscriptionplanMixinFields1
+	subscriptionplanFields := schema.SubscriptionPlan{}.Fields()
+	_ = subscriptionplanFields
+	// subscriptionplanDescCreatedAt is the schema descriptor for created_at field.
+	subscriptionplanDescCreatedAt := subscriptionplanMixinFields0[0].Descriptor()
+	// subscriptionplan.DefaultCreatedAt holds the default value on creation for the created_at field.
+	subscriptionplan.DefaultCreatedAt = subscriptionplanDescCreatedAt.Default.(func() time.Time)
+	// subscriptionplanDescUpdatedAt is the schema descriptor for updated_at field.
+	subscriptionplanDescUpdatedAt := subscriptionplanMixinFields0[1].Descriptor()
+	// subscriptionplan.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	subscriptionplan.DefaultUpdatedAt = subscriptionplanDescUpdatedAt.Default.(func() time.Time)
+	// subscriptionplan.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	subscriptionplan.UpdateDefaultUpdatedAt = subscriptionplanDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// subscriptionplanDescDeletedAt is the schema descriptor for deleted_at field.
+	subscriptionplanDescDeletedAt := subscriptionplanMixinFields1[0].Descriptor()
+	// subscriptionplan.DefaultDeletedAt holds the default value on creation for the deleted_at field.
+	subscriptionplan.DefaultDeletedAt = subscriptionplanDescDeletedAt.Default.(int)
+	// subscriptionplanDescCurrency is the schema descriptor for currency field.
+	subscriptionplanDescCurrency := subscriptionplanFields[3].Descriptor()
+	// subscriptionplan.DefaultCurrency holds the default value on creation for the currency field.
+	subscriptionplan.DefaultCurrency = subscriptionplanDescCurrency.Default.(string)
+	// subscriptionplanDescIsPopular is the schema descriptor for is_popular field.
+	subscriptionplanDescIsPopular := subscriptionplanFields[7].Descriptor()
+	// subscriptionplan.DefaultIsPopular holds the default value on creation for the is_popular field.
+	subscriptionplan.DefaultIsPopular = subscriptionplanDescIsPopular.Default.(bool)
+	// subscriptionplanDescSortOrder is the schema descriptor for sort_order field.
+	subscriptionplanDescSortOrder := subscriptionplanFields[8].Descriptor()
+	// subscriptionplan.DefaultSortOrder holds the default value on creation for the sort_order field.
+	subscriptionplan.DefaultSortOrder = subscriptionplanDescSortOrder.Default.(int)
+	// subscriptionplanDescStatus is the schema descriptor for status field.
+	subscriptionplanDescStatus := subscriptionplanFields[9].Descriptor()
+	// subscriptionplan.DefaultStatus holds the default value on creation for the status field.
+	subscriptionplan.DefaultStatus = subscriptionplanDescStatus.Default.(bool)
 	systemMixin := schema.System{}.Mixin()
 	system.Policy = privacy.NewPolicies(schema.System{})
 	system.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -806,6 +866,41 @@ func init() {
 	userprojectDescScopes := userprojectFields[3].Descriptor()
 	// userproject.DefaultScopes holds the default value on creation for the scopes field.
 	userproject.DefaultScopes = userprojectDescScopes.Default.([]string)
+	userquotaMixin := schema.UserQuota{}.Mixin()
+	userquotaMixinFields0 := userquotaMixin[0].Fields()
+	_ = userquotaMixinFields0
+	userquotaFields := schema.UserQuota{}.Fields()
+	_ = userquotaFields
+	// userquotaDescCreatedAt is the schema descriptor for created_at field.
+	userquotaDescCreatedAt := userquotaMixinFields0[0].Descriptor()
+	// userquota.DefaultCreatedAt holds the default value on creation for the created_at field.
+	userquota.DefaultCreatedAt = userquotaDescCreatedAt.Default.(func() time.Time)
+	// userquotaDescUpdatedAt is the schema descriptor for updated_at field.
+	userquotaDescUpdatedAt := userquotaMixinFields0[1].Descriptor()
+	// userquota.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	userquota.DefaultUpdatedAt = userquotaDescUpdatedAt.Default.(func() time.Time)
+	// userquota.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	userquota.UpdateDefaultUpdatedAt = userquotaDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// userquotaDescQuota is the schema descriptor for quota field.
+	userquotaDescQuota := userquotaFields[1].Descriptor()
+	// userquota.DefaultQuota holds the default value on creation for the quota field.
+	userquota.DefaultQuota = userquotaDescQuota.Default.(int64)
+	// userquotaDescUsedQuota is the schema descriptor for used_quota field.
+	userquotaDescUsedQuota := userquotaFields[2].Descriptor()
+	// userquota.DefaultUsedQuota holds the default value on creation for the used_quota field.
+	userquota.DefaultUsedQuota = userquotaDescUsedQuota.Default.(int64)
+	// userquotaDescGroup is the schema descriptor for group field.
+	userquotaDescGroup := userquotaFields[3].Descriptor()
+	// userquota.DefaultGroup holds the default value on creation for the group field.
+	userquota.DefaultGroup = userquotaDescGroup.Default.(string)
+	// userquotaDescNotify is the schema descriptor for notify field.
+	userquotaDescNotify := userquotaFields[6].Descriptor()
+	// userquota.DefaultNotify holds the default value on creation for the notify field.
+	userquota.DefaultNotify = userquotaDescNotify.Default.(bool)
+	// userquotaDescQuotaRemindThreshold is the schema descriptor for quota_remind_threshold field.
+	userquotaDescQuotaRemindThreshold := userquotaFields[7].Descriptor()
+	// userquota.DefaultQuotaRemindThreshold holds the default value on creation for the quota_remind_threshold field.
+	userquota.DefaultQuotaRemindThreshold = userquotaDescQuotaRemindThreshold.Default.(int64)
 	userroleFields := schema.UserRole{}.Fields()
 	_ = userroleFields
 	// userroleDescCreatedAt is the schema descriptor for created_at field.
@@ -818,6 +913,21 @@ func init() {
 	userrole.DefaultUpdatedAt = userroleDescUpdatedAt.Default.(func() time.Time)
 	// userrole.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	userrole.UpdateDefaultUpdatedAt = userroleDescUpdatedAt.UpdateDefault.(func() time.Time)
+	usersubscriptionMixin := schema.UserSubscription{}.Mixin()
+	usersubscriptionMixinFields0 := usersubscriptionMixin[0].Fields()
+	_ = usersubscriptionMixinFields0
+	usersubscriptionFields := schema.UserSubscription{}.Fields()
+	_ = usersubscriptionFields
+	// usersubscriptionDescCreatedAt is the schema descriptor for created_at field.
+	usersubscriptionDescCreatedAt := usersubscriptionMixinFields0[0].Descriptor()
+	// usersubscription.DefaultCreatedAt holds the default value on creation for the created_at field.
+	usersubscription.DefaultCreatedAt = usersubscriptionDescCreatedAt.Default.(func() time.Time)
+	// usersubscriptionDescUpdatedAt is the schema descriptor for updated_at field.
+	usersubscriptionDescUpdatedAt := usersubscriptionMixinFields0[1].Descriptor()
+	// usersubscription.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	usersubscription.DefaultUpdatedAt = usersubscriptionDescUpdatedAt.Default.(func() time.Time)
+	// usersubscription.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	usersubscription.UpdateDefaultUpdatedAt = usersubscriptionDescUpdatedAt.UpdateDefault.(func() time.Time)
 }
 
 const (

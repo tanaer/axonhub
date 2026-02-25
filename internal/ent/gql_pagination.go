@@ -25,16 +25,20 @@ import (
 	"github.com/looplj/axonhub/internal/ent/project"
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
+	"github.com/looplj/axonhub/internal/ent/quotatransaction"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
+	"github.com/looplj/axonhub/internal/ent/subscriptionplan"
 	"github.com/looplj/axonhub/internal/ent/system"
 	"github.com/looplj/axonhub/internal/ent/thread"
 	"github.com/looplj/axonhub/internal/ent/trace"
 	"github.com/looplj/axonhub/internal/ent/usagelog"
 	"github.com/looplj/axonhub/internal/ent/user"
 	"github.com/looplj/axonhub/internal/ent/userproject"
+	"github.com/looplj/axonhub/internal/ent/userquota"
 	"github.com/looplj/axonhub/internal/ent/userrole"
+	"github.com/looplj/axonhub/internal/ent/usersubscription"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -3615,6 +3619,320 @@ func (_m *ProviderQuotaStatus) ToEdge(order *ProviderQuotaStatusOrder) *Provider
 	}
 }
 
+// QuotaTransactionEdge is the edge representation of QuotaTransaction.
+type QuotaTransactionEdge struct {
+	Node   *QuotaTransaction `json:"node"`
+	Cursor Cursor            `json:"cursor"`
+}
+
+// QuotaTransactionConnection is the connection containing edges to QuotaTransaction.
+type QuotaTransactionConnection struct {
+	Edges      []*QuotaTransactionEdge `json:"edges"`
+	PageInfo   PageInfo                `json:"pageInfo"`
+	TotalCount int                     `json:"totalCount"`
+}
+
+func (c *QuotaTransactionConnection) build(nodes []*QuotaTransaction, pager *quotatransactionPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *QuotaTransaction
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *QuotaTransaction {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *QuotaTransaction {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*QuotaTransactionEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &QuotaTransactionEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// QuotaTransactionPaginateOption enables pagination customization.
+type QuotaTransactionPaginateOption func(*quotatransactionPager) error
+
+// WithQuotaTransactionOrder configures pagination ordering.
+func WithQuotaTransactionOrder(order *QuotaTransactionOrder) QuotaTransactionPaginateOption {
+	if order == nil {
+		order = DefaultQuotaTransactionOrder
+	}
+	o := *order
+	return func(pager *quotatransactionPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultQuotaTransactionOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithQuotaTransactionFilter configures pagination filter.
+func WithQuotaTransactionFilter(filter func(*QuotaTransactionQuery) (*QuotaTransactionQuery, error)) QuotaTransactionPaginateOption {
+	return func(pager *quotatransactionPager) error {
+		if filter == nil {
+			return errors.New("QuotaTransactionQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type quotatransactionPager struct {
+	reverse bool
+	order   *QuotaTransactionOrder
+	filter  func(*QuotaTransactionQuery) (*QuotaTransactionQuery, error)
+}
+
+func newQuotaTransactionPager(opts []QuotaTransactionPaginateOption, reverse bool) (*quotatransactionPager, error) {
+	pager := &quotatransactionPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultQuotaTransactionOrder
+	}
+	return pager, nil
+}
+
+func (p *quotatransactionPager) applyFilter(query *QuotaTransactionQuery) (*QuotaTransactionQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *quotatransactionPager) toCursor(_m *QuotaTransaction) Cursor {
+	return p.order.Field.toCursor(_m)
+}
+
+func (p *quotatransactionPager) applyCursors(query *QuotaTransactionQuery, after, before *Cursor) (*QuotaTransactionQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultQuotaTransactionOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *quotatransactionPager) applyOrder(query *QuotaTransactionQuery) *QuotaTransactionQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultQuotaTransactionOrder.Field {
+		query = query.Order(DefaultQuotaTransactionOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *quotatransactionPager) orderExpr(query *QuotaTransactionQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultQuotaTransactionOrder.Field {
+			b.Comma().Ident(DefaultQuotaTransactionOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to QuotaTransaction.
+func (_m *QuotaTransactionQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...QuotaTransactionPaginateOption,
+) (*QuotaTransactionConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newQuotaTransactionPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if _m, err = pager.applyFilter(_m); err != nil {
+		return nil, err
+	}
+	conn := &QuotaTransactionConnection{Edges: []*QuotaTransactionEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			c := _m.Clone()
+			c.ctx.Fields = nil
+			if conn.TotalCount, err = c.Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if _m, err = pager.applyCursors(_m, after, before); err != nil {
+		return nil, err
+	}
+	limit := paginateLimit(first, last)
+	if limit != 0 {
+		_m.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := _m.collectField(ctx, limit == 1, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	_m = pager.applyOrder(_m)
+	nodes, err := _m.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+var (
+	// QuotaTransactionOrderFieldCreatedAt orders QuotaTransaction by created_at.
+	QuotaTransactionOrderFieldCreatedAt = &QuotaTransactionOrderField{
+		Value: func(_m *QuotaTransaction) (ent.Value, error) {
+			return _m.CreatedAt, nil
+		},
+		column: quotatransaction.FieldCreatedAt,
+		toTerm: quotatransaction.ByCreatedAt,
+		toCursor: func(_m *QuotaTransaction) Cursor {
+			return Cursor{
+				ID:    _m.ID,
+				Value: _m.CreatedAt,
+			}
+		},
+	}
+	// QuotaTransactionOrderFieldUpdatedAt orders QuotaTransaction by updated_at.
+	QuotaTransactionOrderFieldUpdatedAt = &QuotaTransactionOrderField{
+		Value: func(_m *QuotaTransaction) (ent.Value, error) {
+			return _m.UpdatedAt, nil
+		},
+		column: quotatransaction.FieldUpdatedAt,
+		toTerm: quotatransaction.ByUpdatedAt,
+		toCursor: func(_m *QuotaTransaction) Cursor {
+			return Cursor{
+				ID:    _m.ID,
+				Value: _m.UpdatedAt,
+			}
+		},
+	}
+)
+
+// String implement fmt.Stringer interface.
+func (f QuotaTransactionOrderField) String() string {
+	var str string
+	switch f.column {
+	case QuotaTransactionOrderFieldCreatedAt.column:
+		str = "CREATED_AT"
+	case QuotaTransactionOrderFieldUpdatedAt.column:
+		str = "UPDATED_AT"
+	}
+	return str
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (f QuotaTransactionOrderField) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(f.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (f *QuotaTransactionOrderField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("QuotaTransactionOrderField %T must be a string", v)
+	}
+	switch str {
+	case "CREATED_AT":
+		*f = *QuotaTransactionOrderFieldCreatedAt
+	case "UPDATED_AT":
+		*f = *QuotaTransactionOrderFieldUpdatedAt
+	default:
+		return fmt.Errorf("%s is not a valid QuotaTransactionOrderField", str)
+	}
+	return nil
+}
+
+// QuotaTransactionOrderField defines the ordering field of QuotaTransaction.
+type QuotaTransactionOrderField struct {
+	// Value extracts the ordering value from the given QuotaTransaction.
+	Value    func(*QuotaTransaction) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) quotatransaction.OrderOption
+	toCursor func(*QuotaTransaction) Cursor
+}
+
+// QuotaTransactionOrder defines the ordering of QuotaTransaction.
+type QuotaTransactionOrder struct {
+	Direction OrderDirection              `json:"direction"`
+	Field     *QuotaTransactionOrderField `json:"field"`
+}
+
+// DefaultQuotaTransactionOrder is the default ordering of QuotaTransaction.
+var DefaultQuotaTransactionOrder = &QuotaTransactionOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &QuotaTransactionOrderField{
+		Value: func(_m *QuotaTransaction) (ent.Value, error) {
+			return _m.ID, nil
+		},
+		column: quotatransaction.FieldID,
+		toTerm: quotatransaction.ByID,
+		toCursor: func(_m *QuotaTransaction) Cursor {
+			return Cursor{ID: _m.ID}
+		},
+	},
+}
+
+// ToEdge converts QuotaTransaction into QuotaTransactionEdge.
+func (_m *QuotaTransaction) ToEdge(order *QuotaTransactionOrder) *QuotaTransactionEdge {
+	if order == nil {
+		order = DefaultQuotaTransactionOrder
+	}
+	return &QuotaTransactionEdge{
+		Node:   _m,
+		Cursor: order.Field.toCursor(_m),
+	}
+}
+
 // RequestEdge is the edge representation of Request.
 type RequestEdge struct {
 	Node   *Request `json:"node"`
@@ -4552,6 +4870,320 @@ func (_m *Role) ToEdge(order *RoleOrder) *RoleEdge {
 		order = DefaultRoleOrder
 	}
 	return &RoleEdge{
+		Node:   _m,
+		Cursor: order.Field.toCursor(_m),
+	}
+}
+
+// SubscriptionPlanEdge is the edge representation of SubscriptionPlan.
+type SubscriptionPlanEdge struct {
+	Node   *SubscriptionPlan `json:"node"`
+	Cursor Cursor            `json:"cursor"`
+}
+
+// SubscriptionPlanConnection is the connection containing edges to SubscriptionPlan.
+type SubscriptionPlanConnection struct {
+	Edges      []*SubscriptionPlanEdge `json:"edges"`
+	PageInfo   PageInfo                `json:"pageInfo"`
+	TotalCount int                     `json:"totalCount"`
+}
+
+func (c *SubscriptionPlanConnection) build(nodes []*SubscriptionPlan, pager *subscriptionplanPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *SubscriptionPlan
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *SubscriptionPlan {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *SubscriptionPlan {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*SubscriptionPlanEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &SubscriptionPlanEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// SubscriptionPlanPaginateOption enables pagination customization.
+type SubscriptionPlanPaginateOption func(*subscriptionplanPager) error
+
+// WithSubscriptionPlanOrder configures pagination ordering.
+func WithSubscriptionPlanOrder(order *SubscriptionPlanOrder) SubscriptionPlanPaginateOption {
+	if order == nil {
+		order = DefaultSubscriptionPlanOrder
+	}
+	o := *order
+	return func(pager *subscriptionplanPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultSubscriptionPlanOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithSubscriptionPlanFilter configures pagination filter.
+func WithSubscriptionPlanFilter(filter func(*SubscriptionPlanQuery) (*SubscriptionPlanQuery, error)) SubscriptionPlanPaginateOption {
+	return func(pager *subscriptionplanPager) error {
+		if filter == nil {
+			return errors.New("SubscriptionPlanQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type subscriptionplanPager struct {
+	reverse bool
+	order   *SubscriptionPlanOrder
+	filter  func(*SubscriptionPlanQuery) (*SubscriptionPlanQuery, error)
+}
+
+func newSubscriptionPlanPager(opts []SubscriptionPlanPaginateOption, reverse bool) (*subscriptionplanPager, error) {
+	pager := &subscriptionplanPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultSubscriptionPlanOrder
+	}
+	return pager, nil
+}
+
+func (p *subscriptionplanPager) applyFilter(query *SubscriptionPlanQuery) (*SubscriptionPlanQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *subscriptionplanPager) toCursor(_m *SubscriptionPlan) Cursor {
+	return p.order.Field.toCursor(_m)
+}
+
+func (p *subscriptionplanPager) applyCursors(query *SubscriptionPlanQuery, after, before *Cursor) (*SubscriptionPlanQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultSubscriptionPlanOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *subscriptionplanPager) applyOrder(query *SubscriptionPlanQuery) *SubscriptionPlanQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultSubscriptionPlanOrder.Field {
+		query = query.Order(DefaultSubscriptionPlanOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *subscriptionplanPager) orderExpr(query *SubscriptionPlanQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultSubscriptionPlanOrder.Field {
+			b.Comma().Ident(DefaultSubscriptionPlanOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to SubscriptionPlan.
+func (_m *SubscriptionPlanQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...SubscriptionPlanPaginateOption,
+) (*SubscriptionPlanConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newSubscriptionPlanPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if _m, err = pager.applyFilter(_m); err != nil {
+		return nil, err
+	}
+	conn := &SubscriptionPlanConnection{Edges: []*SubscriptionPlanEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			c := _m.Clone()
+			c.ctx.Fields = nil
+			if conn.TotalCount, err = c.Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if _m, err = pager.applyCursors(_m, after, before); err != nil {
+		return nil, err
+	}
+	limit := paginateLimit(first, last)
+	if limit != 0 {
+		_m.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := _m.collectField(ctx, limit == 1, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	_m = pager.applyOrder(_m)
+	nodes, err := _m.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+var (
+	// SubscriptionPlanOrderFieldCreatedAt orders SubscriptionPlan by created_at.
+	SubscriptionPlanOrderFieldCreatedAt = &SubscriptionPlanOrderField{
+		Value: func(_m *SubscriptionPlan) (ent.Value, error) {
+			return _m.CreatedAt, nil
+		},
+		column: subscriptionplan.FieldCreatedAt,
+		toTerm: subscriptionplan.ByCreatedAt,
+		toCursor: func(_m *SubscriptionPlan) Cursor {
+			return Cursor{
+				ID:    _m.ID,
+				Value: _m.CreatedAt,
+			}
+		},
+	}
+	// SubscriptionPlanOrderFieldUpdatedAt orders SubscriptionPlan by updated_at.
+	SubscriptionPlanOrderFieldUpdatedAt = &SubscriptionPlanOrderField{
+		Value: func(_m *SubscriptionPlan) (ent.Value, error) {
+			return _m.UpdatedAt, nil
+		},
+		column: subscriptionplan.FieldUpdatedAt,
+		toTerm: subscriptionplan.ByUpdatedAt,
+		toCursor: func(_m *SubscriptionPlan) Cursor {
+			return Cursor{
+				ID:    _m.ID,
+				Value: _m.UpdatedAt,
+			}
+		},
+	}
+)
+
+// String implement fmt.Stringer interface.
+func (f SubscriptionPlanOrderField) String() string {
+	var str string
+	switch f.column {
+	case SubscriptionPlanOrderFieldCreatedAt.column:
+		str = "CREATED_AT"
+	case SubscriptionPlanOrderFieldUpdatedAt.column:
+		str = "UPDATED_AT"
+	}
+	return str
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (f SubscriptionPlanOrderField) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(f.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (f *SubscriptionPlanOrderField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("SubscriptionPlanOrderField %T must be a string", v)
+	}
+	switch str {
+	case "CREATED_AT":
+		*f = *SubscriptionPlanOrderFieldCreatedAt
+	case "UPDATED_AT":
+		*f = *SubscriptionPlanOrderFieldUpdatedAt
+	default:
+		return fmt.Errorf("%s is not a valid SubscriptionPlanOrderField", str)
+	}
+	return nil
+}
+
+// SubscriptionPlanOrderField defines the ordering field of SubscriptionPlan.
+type SubscriptionPlanOrderField struct {
+	// Value extracts the ordering value from the given SubscriptionPlan.
+	Value    func(*SubscriptionPlan) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) subscriptionplan.OrderOption
+	toCursor func(*SubscriptionPlan) Cursor
+}
+
+// SubscriptionPlanOrder defines the ordering of SubscriptionPlan.
+type SubscriptionPlanOrder struct {
+	Direction OrderDirection              `json:"direction"`
+	Field     *SubscriptionPlanOrderField `json:"field"`
+}
+
+// DefaultSubscriptionPlanOrder is the default ordering of SubscriptionPlan.
+var DefaultSubscriptionPlanOrder = &SubscriptionPlanOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &SubscriptionPlanOrderField{
+		Value: func(_m *SubscriptionPlan) (ent.Value, error) {
+			return _m.ID, nil
+		},
+		column: subscriptionplan.FieldID,
+		toTerm: subscriptionplan.ByID,
+		toCursor: func(_m *SubscriptionPlan) Cursor {
+			return Cursor{ID: _m.ID}
+		},
+	},
+}
+
+// ToEdge converts SubscriptionPlan into SubscriptionPlanEdge.
+func (_m *SubscriptionPlan) ToEdge(order *SubscriptionPlanOrder) *SubscriptionPlanEdge {
+	if order == nil {
+		order = DefaultSubscriptionPlanOrder
+	}
+	return &SubscriptionPlanEdge{
 		Node:   _m,
 		Cursor: order.Field.toCursor(_m),
 	}
@@ -6441,6 +7073,320 @@ func (_m *UserProject) ToEdge(order *UserProjectOrder) *UserProjectEdge {
 	}
 }
 
+// UserQuotaEdge is the edge representation of UserQuota.
+type UserQuotaEdge struct {
+	Node   *UserQuota `json:"node"`
+	Cursor Cursor     `json:"cursor"`
+}
+
+// UserQuotaConnection is the connection containing edges to UserQuota.
+type UserQuotaConnection struct {
+	Edges      []*UserQuotaEdge `json:"edges"`
+	PageInfo   PageInfo         `json:"pageInfo"`
+	TotalCount int              `json:"totalCount"`
+}
+
+func (c *UserQuotaConnection) build(nodes []*UserQuota, pager *userquotaPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *UserQuota
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *UserQuota {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *UserQuota {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*UserQuotaEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &UserQuotaEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// UserQuotaPaginateOption enables pagination customization.
+type UserQuotaPaginateOption func(*userquotaPager) error
+
+// WithUserQuotaOrder configures pagination ordering.
+func WithUserQuotaOrder(order *UserQuotaOrder) UserQuotaPaginateOption {
+	if order == nil {
+		order = DefaultUserQuotaOrder
+	}
+	o := *order
+	return func(pager *userquotaPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultUserQuotaOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithUserQuotaFilter configures pagination filter.
+func WithUserQuotaFilter(filter func(*UserQuotaQuery) (*UserQuotaQuery, error)) UserQuotaPaginateOption {
+	return func(pager *userquotaPager) error {
+		if filter == nil {
+			return errors.New("UserQuotaQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type userquotaPager struct {
+	reverse bool
+	order   *UserQuotaOrder
+	filter  func(*UserQuotaQuery) (*UserQuotaQuery, error)
+}
+
+func newUserQuotaPager(opts []UserQuotaPaginateOption, reverse bool) (*userquotaPager, error) {
+	pager := &userquotaPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultUserQuotaOrder
+	}
+	return pager, nil
+}
+
+func (p *userquotaPager) applyFilter(query *UserQuotaQuery) (*UserQuotaQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *userquotaPager) toCursor(_m *UserQuota) Cursor {
+	return p.order.Field.toCursor(_m)
+}
+
+func (p *userquotaPager) applyCursors(query *UserQuotaQuery, after, before *Cursor) (*UserQuotaQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultUserQuotaOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *userquotaPager) applyOrder(query *UserQuotaQuery) *UserQuotaQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultUserQuotaOrder.Field {
+		query = query.Order(DefaultUserQuotaOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *userquotaPager) orderExpr(query *UserQuotaQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultUserQuotaOrder.Field {
+			b.Comma().Ident(DefaultUserQuotaOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to UserQuota.
+func (_m *UserQuotaQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...UserQuotaPaginateOption,
+) (*UserQuotaConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newUserQuotaPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if _m, err = pager.applyFilter(_m); err != nil {
+		return nil, err
+	}
+	conn := &UserQuotaConnection{Edges: []*UserQuotaEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			c := _m.Clone()
+			c.ctx.Fields = nil
+			if conn.TotalCount, err = c.Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if _m, err = pager.applyCursors(_m, after, before); err != nil {
+		return nil, err
+	}
+	limit := paginateLimit(first, last)
+	if limit != 0 {
+		_m.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := _m.collectField(ctx, limit == 1, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	_m = pager.applyOrder(_m)
+	nodes, err := _m.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+var (
+	// UserQuotaOrderFieldCreatedAt orders UserQuota by created_at.
+	UserQuotaOrderFieldCreatedAt = &UserQuotaOrderField{
+		Value: func(_m *UserQuota) (ent.Value, error) {
+			return _m.CreatedAt, nil
+		},
+		column: userquota.FieldCreatedAt,
+		toTerm: userquota.ByCreatedAt,
+		toCursor: func(_m *UserQuota) Cursor {
+			return Cursor{
+				ID:    _m.ID,
+				Value: _m.CreatedAt,
+			}
+		},
+	}
+	// UserQuotaOrderFieldUpdatedAt orders UserQuota by updated_at.
+	UserQuotaOrderFieldUpdatedAt = &UserQuotaOrderField{
+		Value: func(_m *UserQuota) (ent.Value, error) {
+			return _m.UpdatedAt, nil
+		},
+		column: userquota.FieldUpdatedAt,
+		toTerm: userquota.ByUpdatedAt,
+		toCursor: func(_m *UserQuota) Cursor {
+			return Cursor{
+				ID:    _m.ID,
+				Value: _m.UpdatedAt,
+			}
+		},
+	}
+)
+
+// String implement fmt.Stringer interface.
+func (f UserQuotaOrderField) String() string {
+	var str string
+	switch f.column {
+	case UserQuotaOrderFieldCreatedAt.column:
+		str = "CREATED_AT"
+	case UserQuotaOrderFieldUpdatedAt.column:
+		str = "UPDATED_AT"
+	}
+	return str
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (f UserQuotaOrderField) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(f.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (f *UserQuotaOrderField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("UserQuotaOrderField %T must be a string", v)
+	}
+	switch str {
+	case "CREATED_AT":
+		*f = *UserQuotaOrderFieldCreatedAt
+	case "UPDATED_AT":
+		*f = *UserQuotaOrderFieldUpdatedAt
+	default:
+		return fmt.Errorf("%s is not a valid UserQuotaOrderField", str)
+	}
+	return nil
+}
+
+// UserQuotaOrderField defines the ordering field of UserQuota.
+type UserQuotaOrderField struct {
+	// Value extracts the ordering value from the given UserQuota.
+	Value    func(*UserQuota) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) userquota.OrderOption
+	toCursor func(*UserQuota) Cursor
+}
+
+// UserQuotaOrder defines the ordering of UserQuota.
+type UserQuotaOrder struct {
+	Direction OrderDirection       `json:"direction"`
+	Field     *UserQuotaOrderField `json:"field"`
+}
+
+// DefaultUserQuotaOrder is the default ordering of UserQuota.
+var DefaultUserQuotaOrder = &UserQuotaOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &UserQuotaOrderField{
+		Value: func(_m *UserQuota) (ent.Value, error) {
+			return _m.ID, nil
+		},
+		column: userquota.FieldID,
+		toTerm: userquota.ByID,
+		toCursor: func(_m *UserQuota) Cursor {
+			return Cursor{ID: _m.ID}
+		},
+	},
+}
+
+// ToEdge converts UserQuota into UserQuotaEdge.
+func (_m *UserQuota) ToEdge(order *UserQuotaOrder) *UserQuotaEdge {
+	if order == nil {
+		order = DefaultUserQuotaOrder
+	}
+	return &UserQuotaEdge{
+		Node:   _m,
+		Cursor: order.Field.toCursor(_m),
+	}
+}
+
 // UserRoleEdge is the edge representation of UserRole.
 type UserRoleEdge struct {
 	Node   *UserRole `json:"node"`
@@ -6750,6 +7696,320 @@ func (_m *UserRole) ToEdge(order *UserRoleOrder) *UserRoleEdge {
 		order = DefaultUserRoleOrder
 	}
 	return &UserRoleEdge{
+		Node:   _m,
+		Cursor: order.Field.toCursor(_m),
+	}
+}
+
+// UserSubscriptionEdge is the edge representation of UserSubscription.
+type UserSubscriptionEdge struct {
+	Node   *UserSubscription `json:"node"`
+	Cursor Cursor            `json:"cursor"`
+}
+
+// UserSubscriptionConnection is the connection containing edges to UserSubscription.
+type UserSubscriptionConnection struct {
+	Edges      []*UserSubscriptionEdge `json:"edges"`
+	PageInfo   PageInfo                `json:"pageInfo"`
+	TotalCount int                     `json:"totalCount"`
+}
+
+func (c *UserSubscriptionConnection) build(nodes []*UserSubscription, pager *usersubscriptionPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *UserSubscription
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *UserSubscription {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *UserSubscription {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*UserSubscriptionEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &UserSubscriptionEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// UserSubscriptionPaginateOption enables pagination customization.
+type UserSubscriptionPaginateOption func(*usersubscriptionPager) error
+
+// WithUserSubscriptionOrder configures pagination ordering.
+func WithUserSubscriptionOrder(order *UserSubscriptionOrder) UserSubscriptionPaginateOption {
+	if order == nil {
+		order = DefaultUserSubscriptionOrder
+	}
+	o := *order
+	return func(pager *usersubscriptionPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultUserSubscriptionOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithUserSubscriptionFilter configures pagination filter.
+func WithUserSubscriptionFilter(filter func(*UserSubscriptionQuery) (*UserSubscriptionQuery, error)) UserSubscriptionPaginateOption {
+	return func(pager *usersubscriptionPager) error {
+		if filter == nil {
+			return errors.New("UserSubscriptionQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type usersubscriptionPager struct {
+	reverse bool
+	order   *UserSubscriptionOrder
+	filter  func(*UserSubscriptionQuery) (*UserSubscriptionQuery, error)
+}
+
+func newUserSubscriptionPager(opts []UserSubscriptionPaginateOption, reverse bool) (*usersubscriptionPager, error) {
+	pager := &usersubscriptionPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultUserSubscriptionOrder
+	}
+	return pager, nil
+}
+
+func (p *usersubscriptionPager) applyFilter(query *UserSubscriptionQuery) (*UserSubscriptionQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *usersubscriptionPager) toCursor(_m *UserSubscription) Cursor {
+	return p.order.Field.toCursor(_m)
+}
+
+func (p *usersubscriptionPager) applyCursors(query *UserSubscriptionQuery, after, before *Cursor) (*UserSubscriptionQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultUserSubscriptionOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *usersubscriptionPager) applyOrder(query *UserSubscriptionQuery) *UserSubscriptionQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultUserSubscriptionOrder.Field {
+		query = query.Order(DefaultUserSubscriptionOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *usersubscriptionPager) orderExpr(query *UserSubscriptionQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultUserSubscriptionOrder.Field {
+			b.Comma().Ident(DefaultUserSubscriptionOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to UserSubscription.
+func (_m *UserSubscriptionQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...UserSubscriptionPaginateOption,
+) (*UserSubscriptionConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newUserSubscriptionPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if _m, err = pager.applyFilter(_m); err != nil {
+		return nil, err
+	}
+	conn := &UserSubscriptionConnection{Edges: []*UserSubscriptionEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			c := _m.Clone()
+			c.ctx.Fields = nil
+			if conn.TotalCount, err = c.Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if _m, err = pager.applyCursors(_m, after, before); err != nil {
+		return nil, err
+	}
+	limit := paginateLimit(first, last)
+	if limit != 0 {
+		_m.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := _m.collectField(ctx, limit == 1, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	_m = pager.applyOrder(_m)
+	nodes, err := _m.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+var (
+	// UserSubscriptionOrderFieldCreatedAt orders UserSubscription by created_at.
+	UserSubscriptionOrderFieldCreatedAt = &UserSubscriptionOrderField{
+		Value: func(_m *UserSubscription) (ent.Value, error) {
+			return _m.CreatedAt, nil
+		},
+		column: usersubscription.FieldCreatedAt,
+		toTerm: usersubscription.ByCreatedAt,
+		toCursor: func(_m *UserSubscription) Cursor {
+			return Cursor{
+				ID:    _m.ID,
+				Value: _m.CreatedAt,
+			}
+		},
+	}
+	// UserSubscriptionOrderFieldUpdatedAt orders UserSubscription by updated_at.
+	UserSubscriptionOrderFieldUpdatedAt = &UserSubscriptionOrderField{
+		Value: func(_m *UserSubscription) (ent.Value, error) {
+			return _m.UpdatedAt, nil
+		},
+		column: usersubscription.FieldUpdatedAt,
+		toTerm: usersubscription.ByUpdatedAt,
+		toCursor: func(_m *UserSubscription) Cursor {
+			return Cursor{
+				ID:    _m.ID,
+				Value: _m.UpdatedAt,
+			}
+		},
+	}
+)
+
+// String implement fmt.Stringer interface.
+func (f UserSubscriptionOrderField) String() string {
+	var str string
+	switch f.column {
+	case UserSubscriptionOrderFieldCreatedAt.column:
+		str = "CREATED_AT"
+	case UserSubscriptionOrderFieldUpdatedAt.column:
+		str = "UPDATED_AT"
+	}
+	return str
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (f UserSubscriptionOrderField) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(f.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (f *UserSubscriptionOrderField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("UserSubscriptionOrderField %T must be a string", v)
+	}
+	switch str {
+	case "CREATED_AT":
+		*f = *UserSubscriptionOrderFieldCreatedAt
+	case "UPDATED_AT":
+		*f = *UserSubscriptionOrderFieldUpdatedAt
+	default:
+		return fmt.Errorf("%s is not a valid UserSubscriptionOrderField", str)
+	}
+	return nil
+}
+
+// UserSubscriptionOrderField defines the ordering field of UserSubscription.
+type UserSubscriptionOrderField struct {
+	// Value extracts the ordering value from the given UserSubscription.
+	Value    func(*UserSubscription) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) usersubscription.OrderOption
+	toCursor func(*UserSubscription) Cursor
+}
+
+// UserSubscriptionOrder defines the ordering of UserSubscription.
+type UserSubscriptionOrder struct {
+	Direction OrderDirection              `json:"direction"`
+	Field     *UserSubscriptionOrderField `json:"field"`
+}
+
+// DefaultUserSubscriptionOrder is the default ordering of UserSubscription.
+var DefaultUserSubscriptionOrder = &UserSubscriptionOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &UserSubscriptionOrderField{
+		Value: func(_m *UserSubscription) (ent.Value, error) {
+			return _m.ID, nil
+		},
+		column: usersubscription.FieldID,
+		toTerm: usersubscription.ByID,
+		toCursor: func(_m *UserSubscription) Cursor {
+			return Cursor{ID: _m.ID}
+		},
+	},
+}
+
+// ToEdge converts UserSubscription into UserSubscriptionEdge.
+func (_m *UserSubscription) ToEdge(order *UserSubscriptionOrder) *UserSubscriptionEdge {
+	if order == nil {
+		order = DefaultUserSubscriptionOrder
+	}
+	return &UserSubscriptionEdge{
 		Node:   _m,
 		Cursor: order.Field.toCursor(_m),
 	}

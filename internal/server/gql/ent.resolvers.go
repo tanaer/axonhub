@@ -451,6 +451,11 @@ func (r *queryResolver) Users(ctx context.Context, after *entgql.Cursor[int], fi
 }
 
 // ID is the resolver for the id field.
+func (r *quotaTransactionResolver) ID(ctx context.Context, obj *ent.QuotaTransaction) (*objects.GUID, error) {
+	panic(fmt.Errorf("not implemented: ID - id"))
+}
+
+// ID is the resolver for the id field.
 func (r *requestResolver) ID(ctx context.Context, obj *ent.Request) (*objects.GUID, error) {
 	return &objects.GUID{
 		Type: ent.TypeRequest,
@@ -658,6 +663,11 @@ func (r *roleResolver) UserRoles(ctx context.Context, obj *ent.Role) ([]*ent.Use
 }
 
 // ID is the resolver for the id field.
+func (r *subscriptionPlanResolver) ID(ctx context.Context, obj *ent.SubscriptionPlan) (*objects.GUID, error) {
+	panic(fmt.Errorf("not implemented: ID - id"))
+}
+
+// ID is the resolver for the id field.
 func (r *systemResolver) ID(ctx context.Context, obj *ent.System) (*objects.GUID, error) {
 	return &objects.GUID{
 		Type: ent.TypeSystem,
@@ -785,6 +795,11 @@ func (r *userProjectResolver) ProjectID(ctx context.Context, obj *ent.UserProjec
 }
 
 // ID is the resolver for the id field.
+func (r *userQuotaResolver) ID(ctx context.Context, obj *ent.UserQuota) (*objects.GUID, error) {
+	panic(fmt.Errorf("not implemented: ID - id"))
+}
+
+// ID is the resolver for the id field.
 func (r *userRoleResolver) ID(ctx context.Context, obj *ent.UserRole) (*objects.GUID, error) {
 	return &objects.GUID{
 		Type: ent.TypeUserRole,
@@ -806,6 +821,11 @@ func (r *userRoleResolver) RoleID(ctx context.Context, obj *ent.UserRole) (*obje
 		Type: ent.TypeRole,
 		ID:   obj.RoleID,
 	}, nil
+}
+
+// ID is the resolver for the id field.
+func (r *userSubscriptionResolver) ID(ctx context.Context, obj *ent.UserSubscription) (*objects.GUID, error) {
+	panic(fmt.Errorf("not implemented: ID - id"))
 }
 
 // APIKey returns APIKeyResolver implementation.
@@ -852,6 +872,9 @@ func (r *Resolver) ProviderQuotaStatus() ProviderQuotaStatusResolver {
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// QuotaTransaction returns QuotaTransactionResolver implementation.
+func (r *Resolver) QuotaTransaction() QuotaTransactionResolver { return &quotaTransactionResolver{r} }
+
 // Request returns RequestResolver implementation.
 func (r *Resolver) Request() RequestResolver { return &requestResolver{r} }
 
@@ -860,6 +883,9 @@ func (r *Resolver) RequestExecution() RequestExecutionResolver { return &request
 
 // Role returns RoleResolver implementation.
 func (r *Resolver) Role() RoleResolver { return &roleResolver{r} }
+
+// SubscriptionPlan returns SubscriptionPlanResolver implementation.
+func (r *Resolver) SubscriptionPlan() SubscriptionPlanResolver { return &subscriptionPlanResolver{r} }
 
 // System returns SystemResolver implementation.
 func (r *Resolver) System() SystemResolver { return &systemResolver{r} }
@@ -879,8 +905,14 @@ func (r *Resolver) User() UserResolver { return &userResolver{r} }
 // UserProject returns UserProjectResolver implementation.
 func (r *Resolver) UserProject() UserProjectResolver { return &userProjectResolver{r} }
 
+// UserQuota returns UserQuotaResolver implementation.
+func (r *Resolver) UserQuota() UserQuotaResolver { return &userQuotaResolver{r} }
+
 // UserRole returns UserRoleResolver implementation.
 func (r *Resolver) UserRole() UserRoleResolver { return &userRoleResolver{r} }
+
+// UserSubscription returns UserSubscriptionResolver implementation.
+func (r *Resolver) UserSubscription() UserSubscriptionResolver { return &userSubscriptionResolver{r} }
 
 type aPIKeyResolver struct{ *Resolver }
 type channelResolver struct{ *Resolver }
@@ -894,13 +926,17 @@ type projectResolver struct{ *Resolver }
 type promptResolver struct{ *Resolver }
 type providerQuotaStatusResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type quotaTransactionResolver struct{ *Resolver }
 type requestResolver struct{ *Resolver }
 type requestExecutionResolver struct{ *Resolver }
 type roleResolver struct{ *Resolver }
+type subscriptionPlanResolver struct{ *Resolver }
 type systemResolver struct{ *Resolver }
 type threadResolver struct{ *Resolver }
 type traceResolver struct{ *Resolver }
 type usageLogResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
 type userProjectResolver struct{ *Resolver }
+type userQuotaResolver struct{ *Resolver }
 type userRoleResolver struct{ *Resolver }
+type userSubscriptionResolver struct{ *Resolver }

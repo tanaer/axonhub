@@ -1,10 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
 import { useAuthStore } from '@/stores/authStore';
+import { useSignOut } from '@/features/auth/data/auth';
 
 export default function LandingPage() {
-  const { accessToken } = useAuthStore();
+  const { accessToken, user } = useAuthStore();
   const isLoggedIn = !!accessToken;
+  const signOut = useSignOut();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
@@ -19,9 +21,19 @@ export default function LandingPage() {
           <a href="#pricing" className="text-slate-300 hover:text-white transition-colors">定价</a>
           {isLoggedIn ? (
             <>
+              <span className="text-slate-300">
+                欢迎，{user?.firstName || user?.email || '用户'}
+              </span>
               <Link to="/dashboard">
-                <Button className="bg-indigo-600 hover:bg-indigo-700">控制台</Button>
+                <Button className="bg-indigo-600 hover:bg-indigo-700">进入控制台</Button>
               </Link>
+              <Button
+                variant="ghost"
+                className="text-slate-300 hover:text-white"
+                onClick={signOut}
+              >
+                退出
+              </Button>
             </>
           ) : (
             <>
