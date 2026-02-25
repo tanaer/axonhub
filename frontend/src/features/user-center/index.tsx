@@ -13,6 +13,7 @@ const sidebarItems = [
   { id: 'api-keys', labelKey: 'userCenter.sidebar.apiKeys', icon: '🔑' },
   { id: 'packages', labelKey: 'userCenter.sidebar.packages', icon: '📦' },
   { id: 'billing', labelKey: 'userCenter.sidebar.billing', icon: '💳' },
+  { id: 'orders', labelKey: '订单管理', icon: '📋' },
   { id: 'referral', labelKey: 'userCenter.sidebar.referral', icon: '🎁' },
 ];
 
@@ -249,12 +250,33 @@ function PackagesView() {
 
 function BillingView() {
   const { t } = useTranslation();
+  const auth = useAuthStore((state) => state.auth);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  const transactions = [
-    { id: 1, type: '充值', amount: '+¥100.00', time: '2026-02-25 14:30', status: '成功' },
-    { id: 2, type: '消费', amount: '-¥0.05', time: '2026-02-25 14:25', status: '成功' },
-    { id: 3, type: '消费', amount: '-¥0.12', time: '2026-02-25 14:20', status: '成功' },
-  ];
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch('/admin/quota/transactions', {
+          headers: { 'Authorization': `Bearer ${auth.accessToken}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setTransactions(data.transactions || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch transactions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransactions();
+  }, [auth.accessToken]);
+  
+  const formatAmount = (amount: number) => {
+    const prefix = amount >= 0 ? '+' : '';
+    return `${prefix}¥${(amount / 100).toFixed(2)}`;
+  };
   
   return (
     <Card>
@@ -268,32 +290,100 @@ function BillingView() {
           <Button variant="outline" size="sm">充值</Button>
           <Button variant="outline" size="sm">消费</Button>
         </div>
-        <div className="border rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">类型</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">金额</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">时间</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">状态</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {transactions.map((tx) => (
-                <tr key={tx.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm">{tx.type}</td>
-                  <td className={cn("px-4 py-3 text-sm font-medium", tx.amount.startsWith('+') ? 'text-green-600' : 'text-red-600')}>
-                    {tx.amount}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{tx.time}</td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded">{tx.status}</span>
-                  </td>
+        {loading ? (
+          <div className="text-center py-8 text-gray-500">加载中...</div>
+        ) : transactions.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">暂无交易记录</div>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">类型</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">金额</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">描述</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">时间</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">状态</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y">
+                {transactions.map((tx: any) => (
+                  <tr key={tx.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm">{tx.type === 'recharge' ? '充值' : tx.type === 'consume' ? '消费' : tx.type}</td>
+                    <td className={cn("px-4 py-3 text-sm font-medium", tx.amount >= 0 ? 'text-green-600' : 'text-red-600')}>
+                      {formatAmount(tx.amount)}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{tx.description || '-'}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{tx.created_at ? new Date(tx.created_at).toLocaleString('zh-CN') : '-'}</td>
+                    <td className="px-4 py-3">
+                      <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded">{tx.status || '成功'}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function OrdersView() {
+  const { t } = useTranslation();
+  
+  const orders = [
+    { id: 'RCH20260225123456', type: '充值', amount: '¥100.00', method: 'EPUSDT', status: '已完成', time: '2026-02-25 12:34' },
+    { id: 'PKG20260225123457', type: '套餐', amount: '¥99.00', method: 'Stripe', status: '处理中', time: '2026-02-25 12:35' },
+  ];
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>订单管理</CardTitle>
+        <CardDescription>查看您的所有订单</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-4 flex gap-2">
+          <Button variant="outline" size="sm" className="bg-indigo-50">全部</Button>
+          <Button variant="outline" size="sm">充值</Button>
+          <Button variant="outline" size="sm">套餐</Button>
         </div>
+        {orders.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">暂无订单</div>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">订单号</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">类型</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">金额</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">支付方式</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">状态</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">时间</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {orders.map((order) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-mono">{order.id}</td>
+                    <td className="px-4 py-3 text-sm">{order.type}</td>
+                    <td className="px-4 py-3 text-sm font-medium">{order.amount}</td>
+                    <td className="px-4 py-3 text-sm">{order.method}</td>
+                    <td className="px-4 py-3">
+                      <span className={cn(
+                        "text-xs px-2 py-1 rounded",
+                        order.status === '已完成' ? "bg-green-50 text-green-600" : "bg-yellow-50 text-yellow-600"
+                      )}>{order.status}</span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{order.time}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -352,6 +442,8 @@ export default function UserCenter() {
         return <PackagesView />;
       case 'billing':
         return <BillingView />;
+      case 'orders':
+        return <OrdersView />;
       case 'referral':
         return <ReferralView />;
       default:

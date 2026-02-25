@@ -125,7 +125,16 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button className={`w-full ${p.popular ? 'bg-white text-indigo-600 hover:bg-slate-100' : 'bg-indigo-600 hover:bg-indigo-700'}`}>
+              <Button 
+                className={`w-full ${p.popular ? 'bg-white text-indigo-600 hover:bg-slate-100' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                onClick={() => {
+                  if (loggedIn) {
+                    window.location.href = '/user-center/packages';
+                  } else {
+                    window.location.href = '/sign-up';
+                  }
+                }}
+              >
                 {p.name === '企业版' ? '联系销售' : '立即订阅'}
               </Button>
             </div>
