@@ -189,8 +189,9 @@ func (h *OAuthHandler) Callback(c *gin.Context) {
 		return
 	}
 
-	// Set JWT cookie
-	c.SetCookie("auth_token", tokenString, 7*24*3600, "/", "", true, true)
+	// Set JWT cookie (secure=false for development, should be true in production with HTTPS)
+	secure := h.frontendURL != "" && (len(h.frontendURL) > 5 && h.frontendURL[:5] == "https")
+	c.SetCookie("auth_token", tokenString, 7*24*3600, "/", "", secure, true)
 
 	// Redirect to frontend callback page
 	redirectURL := h.frontendURL + "/auth/callback?auth=success"
