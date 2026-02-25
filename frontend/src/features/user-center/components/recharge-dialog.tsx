@@ -38,31 +38,51 @@ export function RechargeDialog({ onSuccess }: RechargeDialogProps) {
   const handleRecharge = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/admin/quota/recharge', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.accessToken}`,
-        },
-        body: JSON.stringify({
-          amount,
-          payment_method: paymentMethod,
-        }),
-      });
+      if (paymentMethod === 'stripe') {
+        // Stripe 支付
+        const response = await fetch('/admin/stripe/checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth.accessToken}`,
+          },
+          body: JSON.stringify({ amount }),
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (paymentMethod === 'epusdt' && data.payment_url) {
-          // 跳转到 EPUSDT 支付页面
-          window.open(data.payment_url, '_blank');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.checkout_url) {
+            window.location.href = data.checkout_url;
+          }
         } else {
-          // Stripe 支付
-          alert('充值请求已提交，请完成支付');
+          alert('创建支付订单失败，请重试');
         }
-        setOpen(false);
-        onSuccess?.();
       } else {
-        alert('充值失败，请重试');
+        // EPUSDT 支付
+        const response = await fetch('/admin/quota/recharge', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth.accessToken}`,
+          },
+          body: JSON.stringify({
+            amount,
+            payment_method: paymentMethod,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (paymentMethod === 'epusdt' && data.payment_url) {
+            window.open(data.payment_url, '_blank');
+          } else {
+            alert('充值请求已提交，请完成支付');
+          }
+          setOpen(false);
+          onSuccess?.();
+        } else {
+          alert('充值失败，请重试');
+        }
       }
     } catch (error) {
       console.error('Recharge error:', error);
