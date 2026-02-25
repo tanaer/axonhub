@@ -103,7 +103,12 @@ function AccountSettings() {
                 </p>
               )}
             </div>
-            <Button>立即充值</Button>
+            <RechargeDialog onSuccess={() => {
+              setLoading(true);
+              fetch('/admin/quota/me', {
+                headers: { 'Authorization': `Bearer ${auth.accessToken}` }
+              }).then(r => r.json()).then(setQuotaInfo).finally(() => setLoading(false));
+            }} />
           </div>
         </div>
       </CardContent>
