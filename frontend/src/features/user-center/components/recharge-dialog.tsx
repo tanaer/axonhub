@@ -29,7 +29,7 @@ interface RechargeDialogProps {
 
 export function RechargeDialog({ onSuccess }: RechargeDialogProps) {
   const { t } = useTranslation();
-  const { auth } = useAuthStore();
+  const auth = useAuthStore((state) => state.auth);
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(1000);
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'epusdt'>('epusdt');

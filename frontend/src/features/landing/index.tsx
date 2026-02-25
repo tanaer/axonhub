@@ -4,8 +4,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { useSignOut } from '@/features/auth/data/auth';
 
 export default function LandingPage() {
-  const { accessToken, user } = useAuthStore();
-  const isLoggedIn = !!accessToken;
+  const auth = useAuthStore((state) => state.auth);
+  const isLoggedIn = !!auth.accessToken;
   const signOut = useSignOut();
 
   return (
@@ -22,7 +22,7 @@ export default function LandingPage() {
           {isLoggedIn ? (
             <>
               <span className="text-slate-300">
-                欢迎，{user?.firstName || user?.email || '用户'}
+                欢迎，{auth.user?.firstName || auth.user?.email || '用户'}
               </span>
               <Link to="/dashboard">
                 <Button className="bg-indigo-600 hover:bg-indigo-700">进入控制台</Button>

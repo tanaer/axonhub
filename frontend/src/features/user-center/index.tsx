@@ -47,7 +47,7 @@ function UserCenterSidebar({ currentSection }: { currentSection: string }) {
 
 function AccountSettings() {
   const { t } = useTranslation();
-  const { auth } = useAuthStore();
+  const auth = useAuthStore((state) => state.auth);
   const [loading, setLoading] = useState(true);
   
   // 获取用户余额信息
