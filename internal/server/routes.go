@@ -134,6 +134,12 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 		adminGroup.POST("/quota/recharge", handlers.UserQuota.Recharge)
 	}
 
+	// Payment callback routes (public)
+	paymentGroup := server.Group("/api/payment", middleware.WithTimeout(server.Config.RequestTimeout))
+	{
+		paymentGroup.POST("/epusdt/callback", handlers.UserQuota.EPUSDTCallback)
+	}
+
 	openAPIGroup := server.Group("/openapi", middleware.WithOpenAPIAuth(services.AuthService), middleware.WithTimeout(server.Config.RequestTimeout))
 	{
 		openAPIGroup.POST("/v1/graphql", func(c *gin.Context) {
