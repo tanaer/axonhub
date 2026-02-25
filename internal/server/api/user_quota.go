@@ -124,7 +124,166 @@ func (h *UserQuotaHandler) Recharge(c *gin.Context) {
 	})
 }
 
-// EPUSDT 创建订单请求
+// GetPackages returns available subscription packages
+func (h *UserQuotaHandler) GetPackages(c *gin.Context) {
+	// TODO: 从数据库获取套餐列表
+	// 暂时返回预设套餐
+	packages := []gin.H{
+		{
+			"id":            1,
+			"name":          "starter",
+			"display_name":  "体验版",
+			"price":         0,
+			"price_yuan":    0,
+			"currency":      "CNY",
+			"quota":         100000,  // 10元
+			"quota_yuan":    10,
+			"duration_days": 30,
+			"features":      []string{"免费试用", "基础模型", "社区支持"},
+			"is_popular":    false,
+		},
+		{
+			"id":            2,
+			"name":          "basic",
+			"display_name":  "基础版",
+			"price":         9900,    // 99元
+			"price_yuan":    99,
+			"currency":      "CNY",
+			"quota":         1000000, // 100元
+			"quota_yuan":    100,
+			"duration_days": 30,
+			"features":      []string{"5 个 API Key", "全模型接入", "邮件支持"},
+			"is_popular":    false,
+		},
+		{
+			"id":            3,
+			"name":          "pro",
+			"display_name":  "专业版",
+			"price":         29900,   // 299元
+			"price_yuan":    299,
+			"currency":      "CNY",
+			"quota":         5000000, // 500元
+			"quota_yuan":    500,
+			"duration_days": 30,
+			"features":      []string{"无限 API Key", "优先支持", "用量分析"},
+			"is_popular":    true,
+		},
+		{
+			"id":            4,
+			"name":          "enterprise",
+			"display_name":  "企业版",
+			"price":         99900,   // 999元
+			"price_yuan":    999,
+			"currency":      "CNY",
+			"quota":         -1,      // 无限制
+			"quota_yuan":    -1,
+			"duration_days": 30,
+			"features":      []string{"专属部署", "SLA 保障", "7×24 支持"},
+			"is_popular":    false,
+		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{"packages": packages})
+}
+
+// PurchasePackageRequest represents package purchase request
+type PurchasePackageRequest struct {
+	PackageID     int    `json:"package_id" binding:"required"`
+	PaymentMethod string `json:"payment_method" binding:"required"`
+}
+
+// PackageInfo represents a package
+type PackageInfo struct {
+	ID          int
+	Price       int
+	Quota       int
+	DisplayName string
+}
+
+// PurchasePackage creates a package purchase order
+func (h *UserQuotaHandler) PurchasePackage(c *gin.Context) {
+	user, ok := contexts.GetUser(c.Request.Context())
+	if !ok {
+		JSONError(c, http.StatusUnauthorized, errors.New("Not authenticated"))
+		return
+	}
+
+	var req PurchasePackageRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		JSONError(c, http.StatusBadRequest, errors.New("Invalid request: "+err.Error()))
+		return
+	}
+
+	// 获取套餐信息
+	packages := []PackageInfo{
+		{ID: 1, Price: 0, Quota: 100000, DisplayName: "体验版"},
+		{ID: 2, Price: 9900, Quota: 1000000, DisplayName: "基础版"},
+		{ID: 3, Price: 29900, Quota: 5000000, DisplayName: "专业版"},
+		{ID: 4, Price: 99900, Quota: -1, DisplayName: "企业版"},
+	}
+	
+	var pkg *PackageInfo
+	for i := range packages {
+		if packages[i].ID == req.PackageID {
+			pkg = &packages[i]
+			break
+		}
+	}
+	if pkg == nil {
+		JSONError(c, http.StatusBadRequest, errors.New("Package not found"))
+		return
+	}
+
+	// 如果是免费套餐，直接发放
+	if pkg.Price == 0 {
+		err := h.UserQuotaService.AddQuota(c.Request.Context(), user.ID, int64(pkg.Quota), "领取免费套餐: "+pkg.DisplayName, "FREE-"+time.Now().Format("20060102150405"))
+		if err != nil {
+			JSONError(c, http.StatusInternalServerError, errors.New("Failed to add quota: "+err.Error()))
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"success":     true,
+			"message":     "套餐已激活",
+			"quota":       pkg.Quota,
+			"quota_yuan":  float64(pkg.Quota) / 100.0,
+		})
+		return
+	}
+
+	// 付费套餐，创建支付订单
+	orderID := "PKG" + time.Now().Format("20060102150405") + strconv.Itoa(user.ID)
+
+	if req.PaymentMethod == "epusdt" {
+		paymentURL, err := h.createEPUSDTOrder(orderID, int64(pkg.Price))
+		if err != nil {
+			JSONError(c, http.StatusInternalServerError, errors.New("Failed to create payment order: "+err.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"success":      true,
+			"order_id":     orderID,
+			"package_id":   req.PackageID,
+			"package_name": pkg.DisplayName,
+			"amount":       pkg.Price,
+			"amount_yuan":  float64(pkg.Price) / 100.0,
+			"quota":        pkg.Quota,
+			"payment_url":  paymentURL,
+			"status":       "pending",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success":      true,
+		"order_id":     orderID,
+		"package_id":   req.PackageID,
+		"package_name": pkg.DisplayName,
+		"amount":       pkg.Price,
+		"amount_yuan":  float64(pkg.Price) / 100.0,
+		"status":       "pending",
+	})
+}
 type EPUSDTOrderRequest struct {
 	OrderID   string `json:"order_id"`
 	Amount    string `json:"amount"`

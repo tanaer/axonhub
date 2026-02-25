@@ -132,6 +132,8 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 		adminGroup.GET("/quota/me", handlers.UserQuota.GetMyQuota)
 		adminGroup.GET("/quota/transactions", handlers.UserQuota.GetTransactionHistory)
 		adminGroup.POST("/quota/recharge", handlers.UserQuota.Recharge)
+		adminGroup.GET("/packages", handlers.UserQuota.GetPackages)
+		adminGroup.POST("/packages/purchase", handlers.UserQuota.PurchasePackage)
 	}
 
 	// Payment callback routes (public)
