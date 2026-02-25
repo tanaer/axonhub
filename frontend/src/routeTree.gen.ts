@@ -23,8 +23,10 @@ import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authInitializationRouteImport } from './routes/(auth)/initialization'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
+import { Route as AuthenticatedUserCenterRouteRouteImport } from './routes/_authenticated/user-center/route'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
+import { Route as AuthenticatedUserCenterIndexRouteImport } from './routes/_authenticated/user-center/index'
 import { Route as AuthenticatedSystemIndexRouteImport } from './routes/_authenticated/system/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedRolesIndexRouteImport } from './routes/_authenticated/roles/index'
@@ -36,6 +38,10 @@ import { Route as AuthenticatedDataStoragesIndexRouteImport } from './routes/_au
 import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
 import { Route as AuthenticatedChannelsIndexRouteImport } from './routes/_authenticated/channels/index'
 import { Route as AuthenticatedApiKeysIndexRouteImport } from './routes/_authenticated/api-keys/index'
+import { Route as AuthenticatedUserCenterPackagesRouteImport } from './routes/_authenticated/user-center/packages'
+import { Route as AuthenticatedUserCenterOrdersRouteImport } from './routes/_authenticated/user-center/orders'
+import { Route as AuthenticatedUserCenterBillingRouteImport } from './routes/_authenticated/user-center/billing'
+import { Route as AuthenticatedUserCenterAccountRouteImport } from './routes/_authenticated/user-center/account'
 import { Route as AuthenticatedSettingsProfileRouteImport } from './routes/_authenticated/settings/profile'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
 import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
@@ -122,6 +128,12 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedUserCenterRouteRoute =
+  AuthenticatedUserCenterRouteRouteImport.update({
+    id: '/user-center',
+    path: '/user-center',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsRouteRoute =
   AuthenticatedSettingsRouteRouteImport.update({
     id: '/settings',
@@ -133,6 +145,12 @@ const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
   path: '/users/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedUserCenterIndexRoute =
+  AuthenticatedUserCenterIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedUserCenterRoute,
+  } as any)
 const AuthenticatedSystemIndexRoute =
   AuthenticatedSystemIndexRouteImport.update({
     id: '/system/',
@@ -196,6 +214,30 @@ const AuthenticatedApiKeysIndexRoute =
     id: '/api-keys/',
     path: '/api-keys/',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedUserCenterPackagesRoute =
+  AuthenticatedUserCenterPackagesRouteImport.update({
+    id: '/packages',
+    path: '/packages',
+    getParentRoute: () => AuthenticatedUserCenterRoute,
+  } as any)
+const AuthenticatedUserCenterOrdersRoute =
+  AuthenticatedUserCenterOrdersRouteImport.update({
+    id: '/orders',
+    path: '/orders',
+    getParentRoute: () => AuthenticatedUserCenterRoute,
+  } as any)
+const AuthenticatedUserCenterBillingRoute =
+  AuthenticatedUserCenterBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
+    getParentRoute: () => AuthenticatedUserCenterRoute,
+  } as any)
+const AuthenticatedUserCenterAccountRoute =
+  AuthenticatedUserCenterAccountRouteImport.update({
+    id: '/account',
+    path: '/account',
+    getParentRoute: () => AuthenticatedUserCenterRoute,
   } as any)
 const AuthenticatedSettingsProfileRoute =
   AuthenticatedSettingsProfileRouteImport.update({
@@ -296,6 +338,7 @@ const AuthenticatedProjectRequestsRequestIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
+  '/user-center': typeof AuthenticatedUserCenterRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/initialization': typeof authInitializationRoute
   '/sign-in': typeof authSignInRoute
@@ -307,12 +350,15 @@ export interface FileRoutesByFullPath {
   '/503': typeof errors503Route
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/permission': typeof AuthenticatedPermissionRoute
-  '/user-center': typeof AuthenticatedUserCenterRoute
   '/auth/callback': typeof authAuthCallbackRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileRoute
+  '/user-center/account': typeof AuthenticatedUserCenterAccountRoute
+  '/user-center/billing': typeof AuthenticatedUserCenterBillingRoute
+  '/user-center/orders': typeof AuthenticatedUserCenterOrdersRoute
+  '/user-center/packages': typeof AuthenticatedUserCenterPackagesRoute
   '/api-keys': typeof AuthenticatedApiKeysIndexRoute
   '/channels': typeof AuthenticatedChannelsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
@@ -324,6 +370,7 @@ export interface FileRoutesByFullPath {
   '/roles': typeof AuthenticatedRolesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/system': typeof AuthenticatedSystemIndexRoute
+  '/user-center/': typeof AuthenticatedUserCenterIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
   '/project/requests/$requestId': typeof AuthenticatedProjectRequestsRequestIdRoute
   '/project/threads/$threadId': typeof AuthenticatedProjectThreadsThreadIdRoute
@@ -339,6 +386,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/user-center': typeof AuthenticatedUserCenterIndexRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/initialization': typeof authInitializationRoute
   '/sign-in': typeof authSignInRoute
@@ -350,12 +398,15 @@ export interface FileRoutesByTo {
   '/503': typeof errors503Route
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/permission': typeof AuthenticatedPermissionRoute
-  '/user-center': typeof AuthenticatedUserCenterRoute
   '/auth/callback': typeof authAuthCallbackRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/settings/profile': typeof AuthenticatedSettingsProfileRoute
+  '/user-center/account': typeof AuthenticatedUserCenterAccountRoute
+  '/user-center/billing': typeof AuthenticatedUserCenterBillingRoute
+  '/user-center/orders': typeof AuthenticatedUserCenterOrdersRoute
+  '/user-center/packages': typeof AuthenticatedUserCenterPackagesRoute
   '/api-keys': typeof AuthenticatedApiKeysIndexRoute
   '/channels': typeof AuthenticatedChannelsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
@@ -385,6 +436,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
+  '/_authenticated/user-center': typeof AuthenticatedUserCenterRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/initialization': typeof authInitializationRoute
   '/(auth)/sign-in': typeof authSignInRoute
@@ -396,12 +448,15 @@ export interface FileRoutesById {
   '/(errors)/503': typeof errors503Route
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/permission': typeof AuthenticatedPermissionRoute
-  '/_authenticated/user-center': typeof AuthenticatedUserCenterRoute
   '/(auth)/auth/callback': typeof authAuthCallbackRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/_authenticated/settings/profile': typeof AuthenticatedSettingsProfileRoute
+  '/_authenticated/user-center/account': typeof AuthenticatedUserCenterAccountRoute
+  '/_authenticated/user-center/billing': typeof AuthenticatedUserCenterBillingRoute
+  '/_authenticated/user-center/orders': typeof AuthenticatedUserCenterOrdersRoute
+  '/_authenticated/user-center/packages': typeof AuthenticatedUserCenterPackagesRoute
   '/_authenticated/api-keys/': typeof AuthenticatedApiKeysIndexRoute
   '/_authenticated/channels/': typeof AuthenticatedChannelsIndexRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
@@ -413,6 +468,7 @@ export interface FileRoutesById {
   '/_authenticated/roles/': typeof AuthenticatedRolesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/system/': typeof AuthenticatedSystemIndexRoute
+  '/_authenticated/user-center/': typeof AuthenticatedUserCenterIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
   '/_authenticated/project/requests/$requestId': typeof AuthenticatedProjectRequestsRequestIdRoute
   '/_authenticated/project/threads/$threadId': typeof AuthenticatedProjectThreadsThreadIdRoute
@@ -431,6 +487,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/settings'
+    | '/user-center'
     | '/forgot-password'
     | '/initialization'
     | '/sign-in'
@@ -442,12 +499,15 @@ export interface FileRouteTypes {
     | '/503'
     | '/dashboard'
     | '/permission'
-    | '/user-center'
     | '/auth/callback'
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/user-center/account'
+    | '/user-center/billing'
+    | '/user-center/orders'
+    | '/user-center/packages'
     | '/api-keys'
     | '/channels'
     | '/chats'
@@ -459,6 +519,7 @@ export interface FileRouteTypes {
     | '/roles'
     | '/settings/'
     | '/system'
+    | '/user-center/'
     | '/users'
     | '/project/requests/$requestId'
     | '/project/threads/$threadId'
@@ -474,6 +535,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/user-center'
     | '/forgot-password'
     | '/initialization'
     | '/sign-in'
@@ -485,12 +547,15 @@ export interface FileRouteTypes {
     | '/503'
     | '/dashboard'
     | '/permission'
-    | '/user-center'
     | '/auth/callback'
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
     | '/settings/profile'
+    | '/user-center/account'
+    | '/user-center/billing'
+    | '/user-center/orders'
+    | '/user-center/packages'
     | '/api-keys'
     | '/channels'
     | '/chats'
@@ -519,6 +584,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/_authenticated/settings'
+    | '/_authenticated/user-center'
     | '/(auth)/forgot-password'
     | '/(auth)/initialization'
     | '/(auth)/sign-in'
@@ -530,12 +596,15 @@ export interface FileRouteTypes {
     | '/(errors)/503'
     | '/_authenticated/dashboard'
     | '/_authenticated/permission'
-    | '/_authenticated/user-center'
     | '/(auth)/auth/callback'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/settings/profile'
+    | '/_authenticated/user-center/account'
+    | '/_authenticated/user-center/billing'
+    | '/_authenticated/user-center/orders'
+    | '/_authenticated/user-center/packages'
     | '/_authenticated/api-keys/'
     | '/_authenticated/channels/'
     | '/_authenticated/chats/'
@@ -547,6 +616,7 @@ export interface FileRouteTypes {
     | '/_authenticated/roles/'
     | '/_authenticated/settings/'
     | '/_authenticated/system/'
+    | '/_authenticated/user-center/'
     | '/_authenticated/users/'
     | '/_authenticated/project/requests/$requestId'
     | '/_authenticated/project/threads/$threadId'
@@ -676,6 +746,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/user-center': {
+      id: '/_authenticated/user-center'
+      path: '/user-center'
+      fullPath: '/user-center'
+      preLoaderRoute: typeof AuthenticatedUserCenterRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -689,6 +766,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/users'
       preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/user-center/': {
+      id: '/_authenticated/user-center/'
+      path: '/'
+      fullPath: '/user-center/'
+      preLoaderRoute: typeof AuthenticatedUserCenterIndexRouteImport
+      parentRoute: typeof AuthenticatedUserCenterRoute
     }
     '/_authenticated/system/': {
       id: '/_authenticated/system/'
@@ -766,6 +850,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/api-keys'
       preLoaderRoute: typeof AuthenticatedApiKeysIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/user-center/packages': {
+      id: '/_authenticated/user-center/packages'
+      path: '/packages'
+      fullPath: '/user-center/packages'
+      preLoaderRoute: typeof AuthenticatedUserCenterPackagesRouteImport
+      parentRoute: typeof AuthenticatedUserCenterRoute
+    }
+    '/_authenticated/user-center/orders': {
+      id: '/_authenticated/user-center/orders'
+      path: '/orders'
+      fullPath: '/user-center/orders'
+      preLoaderRoute: typeof AuthenticatedUserCenterOrdersRouteImport
+      parentRoute: typeof AuthenticatedUserCenterRoute
+    }
+    '/_authenticated/user-center/billing': {
+      id: '/_authenticated/user-center/billing'
+      path: '/billing'
+      fullPath: '/user-center/billing'
+      preLoaderRoute: typeof AuthenticatedUserCenterBillingRouteImport
+      parentRoute: typeof AuthenticatedUserCenterRoute
+    }
+    '/_authenticated/user-center/account': {
+      id: '/_authenticated/user-center/account'
+      path: '/account'
+      fullPath: '/user-center/account'
+      preLoaderRoute: typeof AuthenticatedUserCenterAccountRouteImport
+      parentRoute: typeof AuthenticatedUserCenterRoute
     }
     '/_authenticated/settings/profile': {
       id: '/_authenticated/settings/profile'
@@ -905,11 +1017,34 @@ const AuthenticatedSettingsRouteRouteWithChildren =
     AuthenticatedSettingsRouteRouteChildren,
   )
 
+interface AuthenticatedUserCenterRouteChildren {
+  AuthenticatedUserCenterAccountRoute: typeof AuthenticatedUserCenterAccountRoute
+  AuthenticatedUserCenterBillingRoute: typeof AuthenticatedUserCenterBillingRoute
+  AuthenticatedUserCenterOrdersRoute: typeof AuthenticatedUserCenterOrdersRoute
+  AuthenticatedUserCenterPackagesRoute: typeof AuthenticatedUserCenterPackagesRoute
+  AuthenticatedUserCenterIndexRoute: typeof AuthenticatedUserCenterIndexRoute
+}
+
+const AuthenticatedUserCenterRouteChildren: AuthenticatedUserCenterRouteChildren =
+  {
+    AuthenticatedUserCenterAccountRoute: AuthenticatedUserCenterAccountRoute,
+    AuthenticatedUserCenterBillingRoute: AuthenticatedUserCenterBillingRoute,
+    AuthenticatedUserCenterOrdersRoute: AuthenticatedUserCenterOrdersRoute,
+    AuthenticatedUserCenterPackagesRoute: AuthenticatedUserCenterPackagesRoute,
+    AuthenticatedUserCenterIndexRoute: AuthenticatedUserCenterIndexRoute,
+  }
+
+const AuthenticatedUserCenterRouteWithChildren =
+  AuthenticatedUserCenterRoute._addFileChildren(
+    AuthenticatedUserCenterRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
+  AuthenticatedUserCenterRouteRoute: typeof AuthenticatedUserCenterRouteRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPermissionRoute: typeof AuthenticatedPermissionRoute
-  AuthenticatedUserCenterRoute: typeof AuthenticatedUserCenterRoute
+  AuthenticatedUserCenterRoute: typeof AuthenticatedUserCenterRouteWithChildren
   AuthenticatedApiKeysIndexRoute: typeof AuthenticatedApiKeysIndexRoute
   AuthenticatedChannelsIndexRoute: typeof AuthenticatedChannelsIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
@@ -936,9 +1071,10 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
+  AuthenticatedUserCenterRouteRoute: AuthenticatedUserCenterRouteRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPermissionRoute: AuthenticatedPermissionRoute,
-  AuthenticatedUserCenterRoute: AuthenticatedUserCenterRoute,
+  AuthenticatedUserCenterRoute: AuthenticatedUserCenterRouteWithChildren,
   AuthenticatedApiKeysIndexRoute: AuthenticatedApiKeysIndexRoute,
   AuthenticatedChannelsIndexRoute: AuthenticatedChannelsIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
