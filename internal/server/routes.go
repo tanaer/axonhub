@@ -135,6 +135,11 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 		adminGroup.GET("/packages", handlers.UserQuota.GetPackages)
 		adminGroup.POST("/packages/purchase", handlers.UserQuota.PurchasePackage)
 		adminGroup.POST("/stripe/checkout", handlers.UserQuota.StripeCreateCheckoutSession)
+		
+		// Admin Statistics API
+		adminGroup.GET("/stats/overview", handlers.UserQuota.GetAdminOverview)
+		adminGroup.GET("/stats/users/trend", handlers.UserQuota.GetUserTrend)
+		adminGroup.GET("/stats/revenue/trend", handlers.UserQuota.GetRevenueTrend)
 	}
 
 	// Payment callback routes (public)

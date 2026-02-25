@@ -245,3 +245,121 @@ func ConvertQuotaToYuan(quota int64) float64 {
 func ConvertYuanToQuota(yuan float64) int64 {
 	return int64(yuan * 500000)
 }
+
+// ========== Admin Statistics ==========
+
+// AdminOverview represents platform-wide statistics
+type AdminOverview struct {
+	TotalUsers       int64   `json:"total_users"`
+	TodayUsers       int64   `json:"today_users"`
+	TotalRevenue     float64 `json:"total_revenue"`     // Total revenue in yuan
+	TodayRevenue     float64 `json:"today_revenue"`     // Today's revenue in yuan
+	ActiveSubs       int64   `json:"active_subscriptions"`
+	TotalTransactions int64  `json:"total_transactions"`
+}
+
+// DailyCount represents daily statistics
+type DailyCount struct {
+	Date  string `json:"date"`
+	Count int64  `json:"count"`
+}
+
+// DailyRevenue represents daily revenue
+type DailyRevenue struct {
+	Date    string  `json:"date"`
+	Revenue float64 `json:"revenue"`
+}
+
+// GetAdminOverview returns platform-wide statistics
+func (s *UserQuotaService) GetAdminOverview(ctx context.Context) (*AdminOverview, error) {
+	return authz.RunWithSystemBypass(ctx, "admin-overview", func(bypassCtx context.Context) (*AdminOverview, error) {
+		client := s.entFromContext(bypassCtx)
+		overview := &AdminOverview{}
+
+		// Total users
+		totalUsers, err := client.User.Query().Count(bypassCtx)
+		if err != nil {
+			log.Warn(bypassCtx, "Failed to count users", log.Cause(err))
+		}
+		overview.TotalUsers = int64(totalUsers)
+
+		// Total transactions
+		totalTx, err := client.QuotaTransaction.Query().Count(bypassCtx)
+		if err != nil {
+			log.Warn(bypassCtx, "Failed to count transactions", log.Cause(err))
+		}
+		overview.TotalTransactions = int64(totalTx)
+
+		// Total revenue (sum of recharge transactions)
+		transactions, err := client.QuotaTransaction.Query().
+			Where(quotatransaction.TypeEQ("recharge")).
+			All(bypassCtx)
+		if err == nil {
+			var total int64
+			for _, tx := range transactions {
+				total += tx.Amount
+			}
+			overview.TotalRevenue = float64(total) / 100.0 // Convert from cents
+		}
+
+		return overview, nil
+	})
+}
+
+// GetUserRegistrationTrend returns user registration trend for last N days
+func (s *UserQuotaService) GetUserRegistrationTrend(ctx context.Context, days int) ([]DailyCount, error) {
+	return authz.RunWithSystemBypass(ctx, "user-trend", func(bypassCtx context.Context) ([]DailyCount, error) {
+		client := s.entFromContext(bypassCtx)
+		
+		// Get all users created in last N days
+		users, err := client.User.Query().All(bypassCtx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Group by date
+		counts := make(map[string]int64)
+		for _, u := range users {
+			date := u.CreatedAt.Format("2006-01-02")
+			counts[date]++
+		}
+
+		// Convert to slice
+		var result []DailyCount
+		for date, count := range counts {
+			result = append(result, DailyCount{Date: date, Count: count})
+		}
+
+		return result, nil
+	})
+}
+
+// GetRevenueTrend returns revenue trend for last N days
+func (s *UserQuotaService) GetRevenueTrend(ctx context.Context, days int) ([]DailyRevenue, error) {
+	return authz.RunWithSystemBypass(ctx, "revenue-trend", func(bypassCtx context.Context) ([]DailyRevenue, error) {
+		client := s.entFromContext(bypassCtx)
+		
+		// Get all recharge transactions
+		transactions, err := client.QuotaTransaction.Query().
+			Where(quotatransaction.TypeEQ("recharge")).
+			All(bypassCtx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Group by date
+		revenues := make(map[string]float64)
+		for _, tx := range transactions {
+			date := tx.CreatedAt.Format("2006-01-02")
+			revenues[date] += float64(tx.Amount) / 100.0
+		}
+
+		// Convert to slice
+		var result []DailyRevenue
+		for date, revenue := range revenues {
+			result = append(result, DailyRevenue{Date: date, Revenue: revenue})
+		}
+
+		return result, nil
+	})
+}

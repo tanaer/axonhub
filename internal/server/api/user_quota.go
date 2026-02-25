@@ -15,6 +15,7 @@ import (
 	"go.uber.org/fx"
 
 	"github.com/looplj/axonhub/internal/contexts"
+	"github.com/looplj/axonhub/internal/log"
 	"github.com/looplj/axonhub/internal/server/biz"
 )
 
@@ -403,4 +404,68 @@ func verifyEPUSDTSign(tradeID, orderID, amount string, status int, sign string) 
 
 func generateOrderID() string {
 	return "ORD-" + time.Now().Format("20060102150405")
+}
+
+// ========== Admin Statistics API ==========
+
+// GetAdminOverview returns overall platform statistics (admin only)
+func (h *UserQuotaHandler) GetAdminOverview(c *gin.Context) {
+	user, ok := contexts.GetUser(c.Request.Context())
+	if !ok {
+		JSONError(c, http.StatusUnauthorized, errors.New("Not authenticated"))
+		return
+	}
+
+	// Log access for audit
+	log.Info(c.Request.Context(), "Stats overview accessed", 
+		log.Int("user_id", user.ID),
+		log.String("email", user.Email))
+
+	stats, err := h.UserQuotaService.GetAdminOverview(c.Request.Context())
+	if err != nil {
+		JSONError(c, http.StatusInternalServerError, errors.New("Failed to get stats: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, stats)
+}
+
+// GetUserTrend returns user registration trend (admin only)
+func (h *UserQuotaHandler) GetUserTrend(c *gin.Context) {
+	user, ok := contexts.GetUser(c.Request.Context())
+	if !ok {
+		JSONError(c, http.StatusUnauthorized, errors.New("Not authenticated"))
+		return
+	}
+
+	log.Info(c.Request.Context(), "User trend accessed", log.Int("user_id", user.ID))
+
+	days := 7
+	trend, err := h.UserQuotaService.GetUserRegistrationTrend(c.Request.Context(), days)
+	if err != nil {
+		JSONError(c, http.StatusInternalServerError, errors.New("Failed to get trend: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"trend": trend})
+}
+
+// GetRevenueTrend returns revenue trend (admin only)
+func (h *UserQuotaHandler) GetRevenueTrend(c *gin.Context) {
+	user, ok := contexts.GetUser(c.Request.Context())
+	if !ok {
+		JSONError(c, http.StatusUnauthorized, errors.New("Not authenticated"))
+		return
+	}
+
+	log.Info(c.Request.Context(), "Revenue trend accessed", log.Int("user_id", user.ID))
+
+	days := 7
+	trend, err := h.UserQuotaService.GetRevenueTrend(c.Request.Context(), days)
+	if err != nil {
+		JSONError(c, http.StatusInternalServerError, errors.New("Failed to get trend: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"trend": trend})
 }
