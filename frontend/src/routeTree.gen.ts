@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedPermissionRouteImport } from './routes/_authenticated/permission'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
@@ -31,6 +31,7 @@ import { Route as AuthenticatedPermissionDemoIndexRouteImport } from './routes/_
 import { Route as AuthenticatedModelsIndexRouteImport } from './routes/_authenticated/models/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
 import { Route as AuthenticatedDataStoragesIndexRouteImport } from './routes/_authenticated/data-storages/index'
+import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
 import { Route as AuthenticatedChannelsIndexRouteImport } from './routes/_authenticated/channels/index'
 import { Route as AuthenticatedApiKeysIndexRouteImport } from './routes/_authenticated/api-keys/index'
@@ -54,10 +55,10 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedPermissionRoute = AuthenticatedPermissionRouteImport.update({
   id: '/permission',
@@ -165,6 +166,12 @@ const AuthenticatedDataStoragesIndexRoute =
   AuthenticatedDataStoragesIndexRouteImport.update({
     id: '/data-storages/',
     path: '/data-storages/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDashboardIndexRoute =
+  AuthenticatedDashboardIndexRouteImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedChatsIndexRoute = AuthenticatedChatsIndexRouteImport.update({
@@ -276,6 +283,7 @@ const AuthenticatedProjectRequestsRequestIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/initialization': typeof authInitializationRoute
@@ -287,7 +295,6 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/permission': typeof AuthenticatedPermissionRoute
-  '/': typeof AuthenticatedIndexRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
@@ -295,6 +302,7 @@ export interface FileRoutesByFullPath {
   '/api-keys': typeof AuthenticatedApiKeysIndexRoute
   '/channels': typeof AuthenticatedChannelsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/data-storages': typeof AuthenticatedDataStoragesIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/models': typeof AuthenticatedModelsIndexRoute
@@ -317,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/project/users': typeof AuthenticatedProjectUsersIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/initialization': typeof authInitializationRoute
   '/sign-in': typeof authSignInRoute
@@ -327,7 +336,6 @@ export interface FileRoutesByTo {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/permission': typeof AuthenticatedPermissionRoute
-  '/': typeof AuthenticatedIndexRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
@@ -335,6 +343,7 @@ export interface FileRoutesByTo {
   '/api-keys': typeof AuthenticatedApiKeysIndexRoute
   '/channels': typeof AuthenticatedChannelsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/data-storages': typeof AuthenticatedDataStoragesIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/models': typeof AuthenticatedModelsIndexRoute
@@ -358,6 +367,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
@@ -370,7 +380,6 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
   '/_authenticated/permission': typeof AuthenticatedPermissionRoute
-  '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
@@ -378,6 +387,7 @@ export interface FileRoutesById {
   '/_authenticated/api-keys/': typeof AuthenticatedApiKeysIndexRoute
   '/_authenticated/channels/': typeof AuthenticatedChannelsIndexRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
+  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/data-storages/': typeof AuthenticatedDataStoragesIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/_authenticated/models/': typeof AuthenticatedModelsIndexRoute
@@ -402,6 +412,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/settings'
     | '/forgot-password'
     | '/initialization'
@@ -413,7 +424,6 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/permission'
-    | '/'
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
@@ -421,6 +431,7 @@ export interface FileRouteTypes {
     | '/api-keys'
     | '/channels'
     | '/chats'
+    | '/dashboard'
     | '/data-storages'
     | '/help-center'
     | '/models'
@@ -443,6 +454,7 @@ export interface FileRouteTypes {
     | '/project/users'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/forgot-password'
     | '/initialization'
     | '/sign-in'
@@ -453,7 +465,6 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/permission'
-    | '/'
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
@@ -461,6 +472,7 @@ export interface FileRouteTypes {
     | '/api-keys'
     | '/channels'
     | '/chats'
+    | '/dashboard'
     | '/data-storages'
     | '/help-center'
     | '/models'
@@ -483,6 +495,7 @@ export interface FileRouteTypes {
     | '/project/users'
   id:
     | '__root__'
+    | '/'
     | '/_authenticated'
     | '/_authenticated/settings'
     | '/(auth)/forgot-password'
@@ -495,7 +508,6 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/permission'
-    | '/_authenticated/'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
@@ -503,6 +515,7 @@ export interface FileRouteTypes {
     | '/_authenticated/api-keys/'
     | '/_authenticated/channels/'
     | '/_authenticated/chats/'
+    | '/_authenticated/dashboard/'
     | '/_authenticated/data-storages/'
     | '/_authenticated/help-center/'
     | '/_authenticated/models/'
@@ -526,6 +539,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authInitializationRoute: typeof authInitializationRoute
@@ -547,12 +561,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/': {
-      id: '/_authenticated/'
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/permission': {
       id: '/_authenticated/permission'
@@ -692,6 +706,13 @@ declare module '@tanstack/react-router' {
       path: '/data-storages'
       fullPath: '/data-storages'
       preLoaderRoute: typeof AuthenticatedDataStoragesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard/': {
+      id: '/_authenticated/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/chats/': {
@@ -849,10 +870,10 @@ const AuthenticatedSettingsRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedPermissionRoute: typeof AuthenticatedPermissionRoute
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedApiKeysIndexRoute: typeof AuthenticatedApiKeysIndexRoute
   AuthenticatedChannelsIndexRoute: typeof AuthenticatedChannelsIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
+  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedDataStoragesIndexRoute: typeof AuthenticatedDataStoragesIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
   AuthenticatedModelsIndexRoute: typeof AuthenticatedModelsIndexRoute
@@ -877,10 +898,10 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedPermissionRoute: AuthenticatedPermissionRoute,
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedApiKeysIndexRoute: AuthenticatedApiKeysIndexRoute,
   AuthenticatedChannelsIndexRoute: AuthenticatedChannelsIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
+  AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   AuthenticatedDataStoragesIndexRoute: AuthenticatedDataStoragesIndexRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
   AuthenticatedModelsIndexRoute: AuthenticatedModelsIndexRoute,
@@ -911,6 +932,7 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authInitializationRoute: authInitializationRoute,
