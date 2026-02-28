@@ -19,4 +19,5 @@ var Module = fx.Module("api",
 	fx.Provide(NewAntigravityHandlers),
 	fx.Provide(NewOAuthHandler),
 	fx.Provide(NewUserQuotaHandler),
+	fx.Provide(NewUserCenterHandlers),
 )

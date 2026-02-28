@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import UserCenter from '@/features/user-center';
+import { OrdersPage } from '@/features/user-center/pages';
 
 export const Route = createFileRoute('/_authenticated/user-center/orders')({
-  component: UserCenter,
+  component: OrdersPage,
 });

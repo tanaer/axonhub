@@ -25,12 +25,19 @@ const presetAmounts = [
 
 interface RechargeDialogProps {
   onSuccess?: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function RechargeDialog({ onSuccess }: RechargeDialogProps) {
+export function RechargeDialog({ onSuccess, open: controlledOpen, onOpenChange }: RechargeDialogProps) {
   const { t } = useTranslation();
   const auth = useAuthStore((state) => state.auth);
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = (value: boolean) => {
+    setInternalOpen(value);
+    onOpenChange?.(value);
+  };
   const [amount, setAmount] = useState(1000);
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'epusdt'>('epusdt');
   const [loading, setLoading] = useState(false);

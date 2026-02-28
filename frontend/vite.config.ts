@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [
     tanstackRouter({
       target: 'react',
-      autoCodeSplitting: true,
+      autoCodeSplitting: false,
     }),
     react(),
     // React table does not work with react-compiler, disable for now.

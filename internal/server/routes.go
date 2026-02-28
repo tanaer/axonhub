@@ -33,6 +33,7 @@ type Handlers struct {
 	Antigravity    *api.AntigravityHandlers
 	OAuth          *api.OAuthHandler
 	UserQuota      *api.UserQuotaHandler
+	UserCenter     *api.UserCenterHandlers
 }
 
 type Services struct {
@@ -140,6 +141,23 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 		adminGroup.GET("/stats/overview", handlers.UserQuota.GetAdminOverview)
 		adminGroup.GET("/stats/users/trend", handlers.UserQuota.GetUserTrend)
 		adminGroup.GET("/stats/revenue/trend", handlers.UserQuota.GetRevenueTrend)
+		
+		// User Center API Keys
+		adminGroup.GET("/api-keys", handlers.UserCenter.GetAPIKeys)
+		adminGroup.POST("/api-keys", handlers.UserCenter.CreateAPIKey)
+		adminGroup.DELETE("/api-keys/:id", handlers.UserCenter.DeleteAPIKey)
+		
+		// User Center Orders
+		adminGroup.GET("/orders", handlers.UserCenter.GetUserOrders)
+		
+		// User Center Referral
+		adminGroup.GET("/referral", handlers.UserCenter.GetUserReferral)
+		adminGroup.GET("/referral/info", handlers.UserCenter.GetReferralInfo)
+		adminGroup.GET("/referral/records", handlers.UserCenter.GetReferralRecords)
+		
+		// User Center Profile
+		adminGroup.PUT("/user/profile", handlers.UserCenter.UpdateProfile)
+		adminGroup.PUT("/user/password", handlers.UserCenter.ChangePassword)
 	}
 
 	// Payment callback routes (public)
@@ -147,6 +165,7 @@ func SetupRoutes(server *Server, handlers Handlers, client *ent.Client, services
 	{
 		paymentGroup.POST("/epusdt/callback", handlers.UserQuota.EPUSDTCallback)
 		paymentGroup.POST("/stripe/webhook", handlers.UserQuota.StripeWebhook)
+		paymentGroup.POST("/mock/confirm", handlers.UserQuota.MockPaymentConfirm)
 	}
 
 	openAPIGroup := server.Group("/openapi", middleware.WithOpenAPIAuth(services.AuthService), middleware.WithTimeout(server.Config.RequestTimeout))

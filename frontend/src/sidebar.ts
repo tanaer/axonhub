@@ -12,6 +12,10 @@ import {
   IconBaselineDensityMedium,
   IconAi,
   IconNote,
+  IconUser,
+  IconCreditCard,
+  IconReceipt,
+  IconGift,
 } from '@tabler/icons-react';
 import { Command } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -65,7 +69,7 @@ export function useSidebarData(): SidebarData {
       items: [
         {
           title: t('sidebar.items.dashboard'),
-          url: '/',
+          url: '/dashboard',
           icon: IconLayoutDashboard,
         } as NavLink,
         {
@@ -165,21 +169,41 @@ export function useSidebarData(): SidebarData {
           icon: IconSettings,
           mobileOnly: true,
         } as NavLink,
-        // {
-        //   title: 'Account',
-        //   url: '/settings/account',
-        //   icon: IconTool,
-        // } as NavLink,
-        // {
-        //   title: 'Appearance',
-        //   url: '/settings/appearance',
-        //   icon: IconPalette,
-        // } as NavLink,
-        // {
-        //   title: 'Notifications',
-        //   url: '/settings/notifications',
-        //   icon: IconNotification,
-        // } as NavLink,
+      ],
+    },
+    {
+      title: t('userCenter.title'),
+      items: [
+        {
+          title: t('userCenter.sidebar.account'),
+          url: '/user-center/account',
+          icon: IconUser,
+        } as NavLink,
+        {
+          title: t('userCenter.sidebar.apiKeys'),
+          url: '/user-center/api-keys',
+          icon: IconKey,
+        } as NavLink,
+        {
+          title: t('userCenter.sidebar.packages'),
+          url: '/user-center/packages',
+          icon: IconPackages,
+        } as NavLink,
+        {
+          title: t('userCenter.sidebar.billing'),
+          url: '/user-center/billing',
+          icon: IconCreditCard,
+        } as NavLink,
+        {
+          title: t('userCenter.sidebar.orders'),
+          url: '/user-center/orders',
+          icon: IconReceipt,
+        } as NavLink,
+        {
+          title: t('userCenter.sidebar.referral'),
+          url: '/user-center/referral',
+          icon: IconGift,
+        } as NavLink,
       ],
     },
   ];

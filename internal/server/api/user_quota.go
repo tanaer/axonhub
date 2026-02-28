@@ -35,10 +35,10 @@ type UserQuotaHandler struct {
 	UserQuotaService *biz.UserQuotaService
 }
 
-// EPUSDT API 配置
-const (
-	EPUSDTBaseURL = "http://localhost:8080"
-	EPUSDTToken   = "649686E56BB62262B4E327C229D836D3"
+// EPUSDT API 配置 - 从环境变量读取，开发环境使用模拟模式
+var (
+	EPUSDTBaseURL = getEnvOrDefault("EPUSDT_BASE_URL", "")
+	EPUSDTToken   = getEnvOrDefault("EPUSDT_TOKEN", "649686E56BB62262B4E327C229D836D3")
 )
 
 // GetMyQuota returns current user's quota info
@@ -306,11 +306,59 @@ type EPUSDTOrderResponse struct {
 }
 
 func (h *UserQuotaHandler) createEPUSDTOrder(orderID string, amount int64) (string, error) {
-	// TODO: EPUSDT API 需要进一步配置
-	// 暂时返回模拟支付页面 URL
+	// 如果没有配置 EPUSDT URL，使用模拟支付页面
+	if EPUSDTBaseURL == "" {
+		// 返回前端模拟支付页面 URL
+		amountUSDT := float64(amount) / 100.0 / 7.0
+		return fmt.Sprintf("/user-center/payment?order_id=%s&amount=%.2f&method=epusdt", orderID, amountUSDT), nil
+	}
+	
 	amountUSDT := float64(amount) / 100.0 / 7.0
 	paymentURL := fmt.Sprintf("%s/payment?order_id=%s&amount=%.2f", EPUSDTBaseURL, orderID, amountUSDT)
 	return paymentURL, nil
+}
+
+// MockPaymentConfirm 模拟支付确认（开发/测试环境使用）
+func (h *UserQuotaHandler) MockPaymentConfirm(c *gin.Context) {
+	var req struct {
+		OrderID string `json:"order_id" binding:"required"`
+		Amount  int64  `json:"amount" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		JSONError(c, http.StatusBadRequest, errors.New("Invalid request"))
+		return
+	}
+
+	// 从订单号解析用户ID
+	orderID := req.OrderID
+	if len(orderID) < 17 {
+		JSONError(c, http.StatusBadRequest, errors.New("Invalid order ID"))
+		return
+	}
+
+	userIDStr := orderID[17:]
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		JSONError(c, http.StatusBadRequest, errors.New("Invalid order ID format"))
+		return
+	}
+
+	// 添加用户余额
+	description := "模拟充值（测试环境）"
+	err = h.UserQuotaService.AddQuota(c.Request.Context(), userID, req.Amount, description, orderID)
+	if err != nil {
+		JSONError(c, http.StatusInternalServerError, errors.New("Failed to add quota: "+err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success":      true,
+		"message":      "Payment confirmed",
+		"order_id":     orderID,
+		"amount":       req.Amount,
+		"amount_yuan":  float64(req.Amount) / 100.0,
+	})
 }
 
 // EPUSDTCallback 处理 EPUSDT 支付回调

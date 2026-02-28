@@ -50,7 +50,7 @@ type SignInResponse struct {
 type SignUpRequest struct {
 	Email     string `json:"email"     binding:"required,email"`
 	Password  string `json:"password"  binding:"required,min=7"`
-	FirstName string `json:"firstName" binding:"required"`
+	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 }
 
@@ -117,15 +117,21 @@ func (h *AuthHandlers) SignUp(c *gin.Context) {
 	firstName := req.FirstName
 	lastName := req.LastName
 	status := user.StatusActivated
-	
+
+	createInput := ent.CreateUserInput{
+		Email:    req.Email,
+		Password: req.Password,
+		Status:   &status,
+	}
+	if firstName != "" {
+		createInput.FirstName = &firstName
+	}
+	if lastName != "" {
+		createInput.LastName = &lastName
+	}
+
 	newUser, err := authz.RunWithSystemBypass(ctx, "signup", func(bypassCtx context.Context) (*ent.User, error) {
-		return h.UserService.CreateUser(bypassCtx, ent.CreateUserInput{
-			Email:     req.Email,
-			Password:  req.Password,
-			FirstName: &firstName,
-			LastName:  &lastName,
-			Status:    &status,
-		})
+		return h.UserService.CreateUser(bypassCtx, createInput)
 	})
 	
 	if err != nil {
