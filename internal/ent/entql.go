@@ -16,6 +16,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
 	"github.com/looplj/axonhub/internal/ent/quotatransaction"
+	"github.com/looplj/axonhub/internal/ent/rechargeorder"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
@@ -38,7 +39,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 25)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 26)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   apikey.Table,
@@ -318,6 +319,33 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[12] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   rechargeorder.Table,
+			Columns: rechargeorder.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: rechargeorder.FieldID,
+			},
+		},
+		Type: "RechargeOrder",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			rechargeorder.FieldCreatedAt:     {Type: field.TypeTime, Column: rechargeorder.FieldCreatedAt},
+			rechargeorder.FieldUpdatedAt:     {Type: field.TypeTime, Column: rechargeorder.FieldUpdatedAt},
+			rechargeorder.FieldOrderID:       {Type: field.TypeString, Column: rechargeorder.FieldOrderID},
+			rechargeorder.FieldUserID:        {Type: field.TypeInt, Column: rechargeorder.FieldUserID},
+			rechargeorder.FieldType:          {Type: field.TypeEnum, Column: rechargeorder.FieldType},
+			rechargeorder.FieldAmount:        {Type: field.TypeInt64, Column: rechargeorder.FieldAmount},
+			rechargeorder.FieldStatus:        {Type: field.TypeEnum, Column: rechargeorder.FieldStatus},
+			rechargeorder.FieldPaymentMethod: {Type: field.TypeString, Column: rechargeorder.FieldPaymentMethod},
+			rechargeorder.FieldTradeID:       {Type: field.TypeString, Column: rechargeorder.FieldTradeID},
+			rechargeorder.FieldPaidAmount:    {Type: field.TypeInt64, Column: rechargeorder.FieldPaidAmount},
+			rechargeorder.FieldPaidAt:        {Type: field.TypeTime, Column: rechargeorder.FieldPaidAt},
+			rechargeorder.FieldExpiresAt:     {Type: field.TypeTime, Column: rechargeorder.FieldExpiresAt},
+			rechargeorder.FieldDescription:   {Type: field.TypeString, Column: rechargeorder.FieldDescription},
+			rechargeorder.FieldPackageID:     {Type: field.TypeInt, Column: rechargeorder.FieldPackageID},
+		},
+	}
+	graph.Nodes[13] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   request.Table,
 			Columns: request.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -349,7 +377,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			request.FieldMetricsFirstTokenLatencyMs: {Type: field.TypeInt64, Column: request.FieldMetricsFirstTokenLatencyMs},
 		},
 	}
-	graph.Nodes[13] = &sqlgraph.Node{
+	graph.Nodes[14] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   requestexecution.Table,
 			Columns: requestexecution.Columns,
@@ -380,7 +408,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			requestexecution.FieldRequestHeaders:             {Type: field.TypeJSON, Column: requestexecution.FieldRequestHeaders},
 		},
 	}
-	graph.Nodes[14] = &sqlgraph.Node{
+	graph.Nodes[15] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   role.Table,
 			Columns: role.Columns,
@@ -400,7 +428,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			role.FieldScopes:    {Type: field.TypeJSON, Column: role.FieldScopes},
 		},
 	}
-	graph.Nodes[15] = &sqlgraph.Node{
+	graph.Nodes[16] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   subscriptionplan.Table,
 			Columns: subscriptionplan.Columns,
@@ -426,7 +454,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			subscriptionplan.FieldStatus:       {Type: field.TypeBool, Column: subscriptionplan.FieldStatus},
 		},
 	}
-	graph.Nodes[16] = &sqlgraph.Node{
+	graph.Nodes[17] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   system.Table,
 			Columns: system.Columns,
@@ -444,7 +472,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			system.FieldValue:     {Type: field.TypeString, Column: system.FieldValue},
 		},
 	}
-	graph.Nodes[17] = &sqlgraph.Node{
+	graph.Nodes[18] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   thread.Table,
 			Columns: thread.Columns,
@@ -461,7 +489,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			thread.FieldThreadID:  {Type: field.TypeString, Column: thread.FieldThreadID},
 		},
 	}
-	graph.Nodes[18] = &sqlgraph.Node{
+	graph.Nodes[19] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   trace.Table,
 			Columns: trace.Columns,
@@ -479,7 +507,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			trace.FieldThreadID:  {Type: field.TypeInt, Column: trace.FieldThreadID},
 		},
 	}
-	graph.Nodes[19] = &sqlgraph.Node{
+	graph.Nodes[20] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   usagelog.Table,
 			Columns: usagelog.Columns,
@@ -516,7 +544,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			usagelog.FieldCostPriceReferenceID:               {Type: field.TypeString, Column: usagelog.FieldCostPriceReferenceID},
 		},
 	}
-	graph.Nodes[20] = &sqlgraph.Node{
+	graph.Nodes[21] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -541,7 +569,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			user.FieldScopes:         {Type: field.TypeJSON, Column: user.FieldScopes},
 		},
 	}
-	graph.Nodes[21] = &sqlgraph.Node{
+	graph.Nodes[22] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   userproject.Table,
 			Columns: userproject.Columns,
@@ -560,7 +588,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			userproject.FieldScopes:    {Type: field.TypeJSON, Column: userproject.FieldScopes},
 		},
 	}
-	graph.Nodes[22] = &sqlgraph.Node{
+	graph.Nodes[23] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   userquota.Table,
 			Columns: userquota.Columns,
@@ -583,7 +611,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			userquota.FieldQuotaRemindThreshold: {Type: field.TypeInt64, Column: userquota.FieldQuotaRemindThreshold},
 		},
 	}
-	graph.Nodes[23] = &sqlgraph.Node{
+	graph.Nodes[24] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   userrole.Table,
 			Columns: userrole.Columns,
@@ -600,7 +628,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			userrole.FieldUpdatedAt: {Type: field.TypeTime, Column: userrole.FieldUpdatedAt},
 		},
 	}
-	graph.Nodes[24] = &sqlgraph.Node{
+	graph.Nodes[25] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   usersubscription.Table,
 			Columns: usersubscription.Columns,
@@ -2790,6 +2818,116 @@ func (f *QuotaTransactionFilter) WhereStatus(p entql.StringP) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (_q *RechargeOrderQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the RechargeOrderQuery builder.
+func (_q *RechargeOrderQuery) Filter() *RechargeOrderFilter {
+	return &RechargeOrderFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *RechargeOrderMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the RechargeOrderMutation builder.
+func (m *RechargeOrderMutation) Filter() *RechargeOrderFilter {
+	return &RechargeOrderFilter{config: m.config, predicateAdder: m}
+}
+
+// RechargeOrderFilter provides a generic filtering capability at runtime for RechargeOrderQuery.
+type RechargeOrderFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *RechargeOrderFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[12].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql int predicate on the id field.
+func (f *RechargeOrderFilter) WhereID(p entql.IntP) {
+	f.Where(p.Field(rechargeorder.FieldID))
+}
+
+// WhereCreatedAt applies the entql time.Time predicate on the created_at field.
+func (f *RechargeOrderFilter) WhereCreatedAt(p entql.TimeP) {
+	f.Where(p.Field(rechargeorder.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql time.Time predicate on the updated_at field.
+func (f *RechargeOrderFilter) WhereUpdatedAt(p entql.TimeP) {
+	f.Where(p.Field(rechargeorder.FieldUpdatedAt))
+}
+
+// WhereOrderID applies the entql string predicate on the order_id field.
+func (f *RechargeOrderFilter) WhereOrderID(p entql.StringP) {
+	f.Where(p.Field(rechargeorder.FieldOrderID))
+}
+
+// WhereUserID applies the entql int predicate on the user_id field.
+func (f *RechargeOrderFilter) WhereUserID(p entql.IntP) {
+	f.Where(p.Field(rechargeorder.FieldUserID))
+}
+
+// WhereType applies the entql string predicate on the type field.
+func (f *RechargeOrderFilter) WhereType(p entql.StringP) {
+	f.Where(p.Field(rechargeorder.FieldType))
+}
+
+// WhereAmount applies the entql int64 predicate on the amount field.
+func (f *RechargeOrderFilter) WhereAmount(p entql.Int64P) {
+	f.Where(p.Field(rechargeorder.FieldAmount))
+}
+
+// WhereStatus applies the entql string predicate on the status field.
+func (f *RechargeOrderFilter) WhereStatus(p entql.StringP) {
+	f.Where(p.Field(rechargeorder.FieldStatus))
+}
+
+// WherePaymentMethod applies the entql string predicate on the payment_method field.
+func (f *RechargeOrderFilter) WherePaymentMethod(p entql.StringP) {
+	f.Where(p.Field(rechargeorder.FieldPaymentMethod))
+}
+
+// WhereTradeID applies the entql string predicate on the trade_id field.
+func (f *RechargeOrderFilter) WhereTradeID(p entql.StringP) {
+	f.Where(p.Field(rechargeorder.FieldTradeID))
+}
+
+// WherePaidAmount applies the entql int64 predicate on the paid_amount field.
+func (f *RechargeOrderFilter) WherePaidAmount(p entql.Int64P) {
+	f.Where(p.Field(rechargeorder.FieldPaidAmount))
+}
+
+// WherePaidAt applies the entql time.Time predicate on the paid_at field.
+func (f *RechargeOrderFilter) WherePaidAt(p entql.TimeP) {
+	f.Where(p.Field(rechargeorder.FieldPaidAt))
+}
+
+// WhereExpiresAt applies the entql time.Time predicate on the expires_at field.
+func (f *RechargeOrderFilter) WhereExpiresAt(p entql.TimeP) {
+	f.Where(p.Field(rechargeorder.FieldExpiresAt))
+}
+
+// WhereDescription applies the entql string predicate on the description field.
+func (f *RechargeOrderFilter) WhereDescription(p entql.StringP) {
+	f.Where(p.Field(rechargeorder.FieldDescription))
+}
+
+// WherePackageID applies the entql int predicate on the package_id field.
+func (f *RechargeOrderFilter) WherePackageID(p entql.IntP) {
+	f.Where(p.Field(rechargeorder.FieldPackageID))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (_q *RequestQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
@@ -2818,7 +2956,7 @@ type RequestFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *RequestFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[12].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3056,7 +3194,7 @@ type RequestExecutionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *RequestExecutionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[13].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[14].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3228,7 +3366,7 @@ type RoleFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *RoleFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[14].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[15].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3345,7 +3483,7 @@ type SubscriptionPlanFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *SubscriptionPlanFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[15].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3450,7 +3588,7 @@ type SystemFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *SystemFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[16].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3515,7 +3653,7 @@ type ThreadFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *ThreadFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3603,7 +3741,7 @@ type TraceFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TraceFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[18].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[19].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3710,7 +3848,7 @@ type UsageLogFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UsageLogFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[19].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[20].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -3912,7 +4050,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[20].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[21].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -4096,7 +4234,7 @@ type UserProjectFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserProjectFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[21].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[22].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -4194,7 +4332,7 @@ type UserQuotaFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserQuotaFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[22].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[23].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -4284,7 +4422,7 @@ type UserRoleFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserRoleFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[23].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[24].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -4372,7 +4510,7 @@ type UserSubscriptionFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserSubscriptionFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[24].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[25].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

@@ -20,6 +20,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
 	"github.com/looplj/axonhub/internal/ent/quotatransaction"
+	"github.com/looplj/axonhub/internal/ent/rechargeorder"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
@@ -5540,6 +5541,710 @@ func (i *QuotaTransactionWhereInput) P() (predicate.QuotaTransaction, error) {
 		return predicates[0], nil
 	default:
 		return quotatransaction.And(predicates...), nil
+	}
+}
+
+// RechargeOrderWhereInput represents a where input for filtering RechargeOrder queries.
+type RechargeOrderWhereInput struct {
+	Predicates []predicate.RechargeOrder  `json:"-"`
+	Not        *RechargeOrderWhereInput   `json:"not,omitempty"`
+	Or         []*RechargeOrderWhereInput `json:"or,omitempty"`
+	And        []*RechargeOrderWhereInput `json:"and,omitempty"`
+
+	// "id" field predicates.
+	ID      *int  `json:"id,omitempty"`
+	IDNEQ   *int  `json:"idNEQ,omitempty"`
+	IDIn    []int `json:"idIn,omitempty"`
+	IDNotIn []int `json:"idNotIn,omitempty"`
+	IDGT    *int  `json:"idGT,omitempty"`
+	IDGTE   *int  `json:"idGTE,omitempty"`
+	IDLT    *int  `json:"idLT,omitempty"`
+	IDLTE   *int  `json:"idLTE,omitempty"`
+
+	// "created_at" field predicates.
+	CreatedAt      *time.Time  `json:"createdAt,omitempty"`
+	CreatedAtNEQ   *time.Time  `json:"createdAtNEQ,omitempty"`
+	CreatedAtIn    []time.Time `json:"createdAtIn,omitempty"`
+	CreatedAtNotIn []time.Time `json:"createdAtNotIn,omitempty"`
+	CreatedAtGT    *time.Time  `json:"createdAtGT,omitempty"`
+	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
+	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
+	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
+
+	// "updated_at" field predicates.
+	UpdatedAt      *time.Time  `json:"updatedAt,omitempty"`
+	UpdatedAtNEQ   *time.Time  `json:"updatedAtNEQ,omitempty"`
+	UpdatedAtIn    []time.Time `json:"updatedAtIn,omitempty"`
+	UpdatedAtNotIn []time.Time `json:"updatedAtNotIn,omitempty"`
+	UpdatedAtGT    *time.Time  `json:"updatedAtGT,omitempty"`
+	UpdatedAtGTE   *time.Time  `json:"updatedAtGTE,omitempty"`
+	UpdatedAtLT    *time.Time  `json:"updatedAtLT,omitempty"`
+	UpdatedAtLTE   *time.Time  `json:"updatedAtLTE,omitempty"`
+
+	// "order_id" field predicates.
+	OrderID             *string  `json:"orderID,omitempty"`
+	OrderIDNEQ          *string  `json:"orderIDNEQ,omitempty"`
+	OrderIDIn           []string `json:"orderIDIn,omitempty"`
+	OrderIDNotIn        []string `json:"orderIDNotIn,omitempty"`
+	OrderIDGT           *string  `json:"orderIDGT,omitempty"`
+	OrderIDGTE          *string  `json:"orderIDGTE,omitempty"`
+	OrderIDLT           *string  `json:"orderIDLT,omitempty"`
+	OrderIDLTE          *string  `json:"orderIDLTE,omitempty"`
+	OrderIDContains     *string  `json:"orderIDContains,omitempty"`
+	OrderIDHasPrefix    *string  `json:"orderIDHasPrefix,omitempty"`
+	OrderIDHasSuffix    *string  `json:"orderIDHasSuffix,omitempty"`
+	OrderIDEqualFold    *string  `json:"orderIDEqualFold,omitempty"`
+	OrderIDContainsFold *string  `json:"orderIDContainsFold,omitempty"`
+
+	// "user_id" field predicates.
+	UserID      *int  `json:"userID,omitempty"`
+	UserIDNEQ   *int  `json:"userIDNEQ,omitempty"`
+	UserIDIn    []int `json:"userIDIn,omitempty"`
+	UserIDNotIn []int `json:"userIDNotIn,omitempty"`
+	UserIDGT    *int  `json:"userIDGT,omitempty"`
+	UserIDGTE   *int  `json:"userIDGTE,omitempty"`
+	UserIDLT    *int  `json:"userIDLT,omitempty"`
+	UserIDLTE   *int  `json:"userIDLTE,omitempty"`
+
+	// "type" field predicates.
+	Type      *rechargeorder.Type  `json:"type,omitempty"`
+	TypeNEQ   *rechargeorder.Type  `json:"typeNEQ,omitempty"`
+	TypeIn    []rechargeorder.Type `json:"typeIn,omitempty"`
+	TypeNotIn []rechargeorder.Type `json:"typeNotIn,omitempty"`
+
+	// "amount" field predicates.
+	Amount      *int64  `json:"amount,omitempty"`
+	AmountNEQ   *int64  `json:"amountNEQ,omitempty"`
+	AmountIn    []int64 `json:"amountIn,omitempty"`
+	AmountNotIn []int64 `json:"amountNotIn,omitempty"`
+	AmountGT    *int64  `json:"amountGT,omitempty"`
+	AmountGTE   *int64  `json:"amountGTE,omitempty"`
+	AmountLT    *int64  `json:"amountLT,omitempty"`
+	AmountLTE   *int64  `json:"amountLTE,omitempty"`
+
+	// "status" field predicates.
+	Status      *rechargeorder.Status  `json:"status,omitempty"`
+	StatusNEQ   *rechargeorder.Status  `json:"statusNEQ,omitempty"`
+	StatusIn    []rechargeorder.Status `json:"statusIn,omitempty"`
+	StatusNotIn []rechargeorder.Status `json:"statusNotIn,omitempty"`
+
+	// "payment_method" field predicates.
+	PaymentMethod             *string  `json:"paymentMethod,omitempty"`
+	PaymentMethodNEQ          *string  `json:"paymentMethodNEQ,omitempty"`
+	PaymentMethodIn           []string `json:"paymentMethodIn,omitempty"`
+	PaymentMethodNotIn        []string `json:"paymentMethodNotIn,omitempty"`
+	PaymentMethodGT           *string  `json:"paymentMethodGT,omitempty"`
+	PaymentMethodGTE          *string  `json:"paymentMethodGTE,omitempty"`
+	PaymentMethodLT           *string  `json:"paymentMethodLT,omitempty"`
+	PaymentMethodLTE          *string  `json:"paymentMethodLTE,omitempty"`
+	PaymentMethodContains     *string  `json:"paymentMethodContains,omitempty"`
+	PaymentMethodHasPrefix    *string  `json:"paymentMethodHasPrefix,omitempty"`
+	PaymentMethodHasSuffix    *string  `json:"paymentMethodHasSuffix,omitempty"`
+	PaymentMethodIsNil        bool     `json:"paymentMethodIsNil,omitempty"`
+	PaymentMethodNotNil       bool     `json:"paymentMethodNotNil,omitempty"`
+	PaymentMethodEqualFold    *string  `json:"paymentMethodEqualFold,omitempty"`
+	PaymentMethodContainsFold *string  `json:"paymentMethodContainsFold,omitempty"`
+
+	// "trade_id" field predicates.
+	TradeID             *string  `json:"tradeID,omitempty"`
+	TradeIDNEQ          *string  `json:"tradeIDNEQ,omitempty"`
+	TradeIDIn           []string `json:"tradeIDIn,omitempty"`
+	TradeIDNotIn        []string `json:"tradeIDNotIn,omitempty"`
+	TradeIDGT           *string  `json:"tradeIDGT,omitempty"`
+	TradeIDGTE          *string  `json:"tradeIDGTE,omitempty"`
+	TradeIDLT           *string  `json:"tradeIDLT,omitempty"`
+	TradeIDLTE          *string  `json:"tradeIDLTE,omitempty"`
+	TradeIDContains     *string  `json:"tradeIDContains,omitempty"`
+	TradeIDHasPrefix    *string  `json:"tradeIDHasPrefix,omitempty"`
+	TradeIDHasSuffix    *string  `json:"tradeIDHasSuffix,omitempty"`
+	TradeIDIsNil        bool     `json:"tradeIDIsNil,omitempty"`
+	TradeIDNotNil       bool     `json:"tradeIDNotNil,omitempty"`
+	TradeIDEqualFold    *string  `json:"tradeIDEqualFold,omitempty"`
+	TradeIDContainsFold *string  `json:"tradeIDContainsFold,omitempty"`
+
+	// "paid_amount" field predicates.
+	PaidAmount       *int64  `json:"paidAmount,omitempty"`
+	PaidAmountNEQ    *int64  `json:"paidAmountNEQ,omitempty"`
+	PaidAmountIn     []int64 `json:"paidAmountIn,omitempty"`
+	PaidAmountNotIn  []int64 `json:"paidAmountNotIn,omitempty"`
+	PaidAmountGT     *int64  `json:"paidAmountGT,omitempty"`
+	PaidAmountGTE    *int64  `json:"paidAmountGTE,omitempty"`
+	PaidAmountLT     *int64  `json:"paidAmountLT,omitempty"`
+	PaidAmountLTE    *int64  `json:"paidAmountLTE,omitempty"`
+	PaidAmountIsNil  bool    `json:"paidAmountIsNil,omitempty"`
+	PaidAmountNotNil bool    `json:"paidAmountNotNil,omitempty"`
+
+	// "paid_at" field predicates.
+	PaidAt       *time.Time  `json:"paidAt,omitempty"`
+	PaidAtNEQ    *time.Time  `json:"paidAtNEQ,omitempty"`
+	PaidAtIn     []time.Time `json:"paidAtIn,omitempty"`
+	PaidAtNotIn  []time.Time `json:"paidAtNotIn,omitempty"`
+	PaidAtGT     *time.Time  `json:"paidAtGT,omitempty"`
+	PaidAtGTE    *time.Time  `json:"paidAtGTE,omitempty"`
+	PaidAtLT     *time.Time  `json:"paidAtLT,omitempty"`
+	PaidAtLTE    *time.Time  `json:"paidAtLTE,omitempty"`
+	PaidAtIsNil  bool        `json:"paidAtIsNil,omitempty"`
+	PaidAtNotNil bool        `json:"paidAtNotNil,omitempty"`
+
+	// "expires_at" field predicates.
+	ExpiresAt       *time.Time  `json:"expiresAt,omitempty"`
+	ExpiresAtNEQ    *time.Time  `json:"expiresAtNEQ,omitempty"`
+	ExpiresAtIn     []time.Time `json:"expiresAtIn,omitempty"`
+	ExpiresAtNotIn  []time.Time `json:"expiresAtNotIn,omitempty"`
+	ExpiresAtGT     *time.Time  `json:"expiresAtGT,omitempty"`
+	ExpiresAtGTE    *time.Time  `json:"expiresAtGTE,omitempty"`
+	ExpiresAtLT     *time.Time  `json:"expiresAtLT,omitempty"`
+	ExpiresAtLTE    *time.Time  `json:"expiresAtLTE,omitempty"`
+	ExpiresAtIsNil  bool        `json:"expiresAtIsNil,omitempty"`
+	ExpiresAtNotNil bool        `json:"expiresAtNotNil,omitempty"`
+
+	// "description" field predicates.
+	Description             *string  `json:"description,omitempty"`
+	DescriptionNEQ          *string  `json:"descriptionNEQ,omitempty"`
+	DescriptionIn           []string `json:"descriptionIn,omitempty"`
+	DescriptionNotIn        []string `json:"descriptionNotIn,omitempty"`
+	DescriptionGT           *string  `json:"descriptionGT,omitempty"`
+	DescriptionGTE          *string  `json:"descriptionGTE,omitempty"`
+	DescriptionLT           *string  `json:"descriptionLT,omitempty"`
+	DescriptionLTE          *string  `json:"descriptionLTE,omitempty"`
+	DescriptionContains     *string  `json:"descriptionContains,omitempty"`
+	DescriptionHasPrefix    *string  `json:"descriptionHasPrefix,omitempty"`
+	DescriptionHasSuffix    *string  `json:"descriptionHasSuffix,omitempty"`
+	DescriptionIsNil        bool     `json:"descriptionIsNil,omitempty"`
+	DescriptionNotNil       bool     `json:"descriptionNotNil,omitempty"`
+	DescriptionEqualFold    *string  `json:"descriptionEqualFold,omitempty"`
+	DescriptionContainsFold *string  `json:"descriptionContainsFold,omitempty"`
+
+	// "package_id" field predicates.
+	PackageID       *int  `json:"packageID,omitempty"`
+	PackageIDNEQ    *int  `json:"packageIDNEQ,omitempty"`
+	PackageIDIn     []int `json:"packageIDIn,omitempty"`
+	PackageIDNotIn  []int `json:"packageIDNotIn,omitempty"`
+	PackageIDGT     *int  `json:"packageIDGT,omitempty"`
+	PackageIDGTE    *int  `json:"packageIDGTE,omitempty"`
+	PackageIDLT     *int  `json:"packageIDLT,omitempty"`
+	PackageIDLTE    *int  `json:"packageIDLTE,omitempty"`
+	PackageIDIsNil  bool  `json:"packageIDIsNil,omitempty"`
+	PackageIDNotNil bool  `json:"packageIDNotNil,omitempty"`
+}
+
+// AddPredicates adds custom predicates to the where input to be used during the filtering phase.
+func (i *RechargeOrderWhereInput) AddPredicates(predicates ...predicate.RechargeOrder) {
+	i.Predicates = append(i.Predicates, predicates...)
+}
+
+// Filter applies the RechargeOrderWhereInput filter on the RechargeOrderQuery builder.
+func (i *RechargeOrderWhereInput) Filter(q *RechargeOrderQuery) (*RechargeOrderQuery, error) {
+	if i == nil {
+		return q, nil
+	}
+	p, err := i.P()
+	if err != nil {
+		if err == ErrEmptyRechargeOrderWhereInput {
+			return q, nil
+		}
+		return nil, err
+	}
+	return q.Where(p), nil
+}
+
+// ErrEmptyRechargeOrderWhereInput is returned in case the RechargeOrderWhereInput is empty.
+var ErrEmptyRechargeOrderWhereInput = errors.New("ent: empty predicate RechargeOrderWhereInput")
+
+// P returns a predicate for filtering rechargeorders.
+// An error is returned if the input is empty or invalid.
+func (i *RechargeOrderWhereInput) P() (predicate.RechargeOrder, error) {
+	var predicates []predicate.RechargeOrder
+	if i.Not != nil {
+		p, err := i.Not.P()
+		if err != nil {
+			return nil, fmt.Errorf("%w: field 'not'", err)
+		}
+		predicates = append(predicates, rechargeorder.Not(p))
+	}
+	switch n := len(i.Or); {
+	case n == 1:
+		p, err := i.Or[0].P()
+		if err != nil {
+			return nil, fmt.Errorf("%w: field 'or'", err)
+		}
+		predicates = append(predicates, p)
+	case n > 1:
+		or := make([]predicate.RechargeOrder, 0, n)
+		for _, w := range i.Or {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'or'", err)
+			}
+			or = append(or, p)
+		}
+		predicates = append(predicates, rechargeorder.Or(or...))
+	}
+	switch n := len(i.And); {
+	case n == 1:
+		p, err := i.And[0].P()
+		if err != nil {
+			return nil, fmt.Errorf("%w: field 'and'", err)
+		}
+		predicates = append(predicates, p)
+	case n > 1:
+		and := make([]predicate.RechargeOrder, 0, n)
+		for _, w := range i.And {
+			p, err := w.P()
+			if err != nil {
+				return nil, fmt.Errorf("%w: field 'and'", err)
+			}
+			and = append(and, p)
+		}
+		predicates = append(predicates, rechargeorder.And(and...))
+	}
+	predicates = append(predicates, i.Predicates...)
+	if i.ID != nil {
+		predicates = append(predicates, rechargeorder.IDEQ(*i.ID))
+	}
+	if i.IDNEQ != nil {
+		predicates = append(predicates, rechargeorder.IDNEQ(*i.IDNEQ))
+	}
+	if len(i.IDIn) > 0 {
+		predicates = append(predicates, rechargeorder.IDIn(i.IDIn...))
+	}
+	if len(i.IDNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.IDNotIn(i.IDNotIn...))
+	}
+	if i.IDGT != nil {
+		predicates = append(predicates, rechargeorder.IDGT(*i.IDGT))
+	}
+	if i.IDGTE != nil {
+		predicates = append(predicates, rechargeorder.IDGTE(*i.IDGTE))
+	}
+	if i.IDLT != nil {
+		predicates = append(predicates, rechargeorder.IDLT(*i.IDLT))
+	}
+	if i.IDLTE != nil {
+		predicates = append(predicates, rechargeorder.IDLTE(*i.IDLTE))
+	}
+	if i.CreatedAt != nil {
+		predicates = append(predicates, rechargeorder.CreatedAtEQ(*i.CreatedAt))
+	}
+	if i.CreatedAtNEQ != nil {
+		predicates = append(predicates, rechargeorder.CreatedAtNEQ(*i.CreatedAtNEQ))
+	}
+	if len(i.CreatedAtIn) > 0 {
+		predicates = append(predicates, rechargeorder.CreatedAtIn(i.CreatedAtIn...))
+	}
+	if len(i.CreatedAtNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.CreatedAtNotIn(i.CreatedAtNotIn...))
+	}
+	if i.CreatedAtGT != nil {
+		predicates = append(predicates, rechargeorder.CreatedAtGT(*i.CreatedAtGT))
+	}
+	if i.CreatedAtGTE != nil {
+		predicates = append(predicates, rechargeorder.CreatedAtGTE(*i.CreatedAtGTE))
+	}
+	if i.CreatedAtLT != nil {
+		predicates = append(predicates, rechargeorder.CreatedAtLT(*i.CreatedAtLT))
+	}
+	if i.CreatedAtLTE != nil {
+		predicates = append(predicates, rechargeorder.CreatedAtLTE(*i.CreatedAtLTE))
+	}
+	if i.UpdatedAt != nil {
+		predicates = append(predicates, rechargeorder.UpdatedAtEQ(*i.UpdatedAt))
+	}
+	if i.UpdatedAtNEQ != nil {
+		predicates = append(predicates, rechargeorder.UpdatedAtNEQ(*i.UpdatedAtNEQ))
+	}
+	if len(i.UpdatedAtIn) > 0 {
+		predicates = append(predicates, rechargeorder.UpdatedAtIn(i.UpdatedAtIn...))
+	}
+	if len(i.UpdatedAtNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.UpdatedAtNotIn(i.UpdatedAtNotIn...))
+	}
+	if i.UpdatedAtGT != nil {
+		predicates = append(predicates, rechargeorder.UpdatedAtGT(*i.UpdatedAtGT))
+	}
+	if i.UpdatedAtGTE != nil {
+		predicates = append(predicates, rechargeorder.UpdatedAtGTE(*i.UpdatedAtGTE))
+	}
+	if i.UpdatedAtLT != nil {
+		predicates = append(predicates, rechargeorder.UpdatedAtLT(*i.UpdatedAtLT))
+	}
+	if i.UpdatedAtLTE != nil {
+		predicates = append(predicates, rechargeorder.UpdatedAtLTE(*i.UpdatedAtLTE))
+	}
+	if i.OrderID != nil {
+		predicates = append(predicates, rechargeorder.OrderIDEQ(*i.OrderID))
+	}
+	if i.OrderIDNEQ != nil {
+		predicates = append(predicates, rechargeorder.OrderIDNEQ(*i.OrderIDNEQ))
+	}
+	if len(i.OrderIDIn) > 0 {
+		predicates = append(predicates, rechargeorder.OrderIDIn(i.OrderIDIn...))
+	}
+	if len(i.OrderIDNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.OrderIDNotIn(i.OrderIDNotIn...))
+	}
+	if i.OrderIDGT != nil {
+		predicates = append(predicates, rechargeorder.OrderIDGT(*i.OrderIDGT))
+	}
+	if i.OrderIDGTE != nil {
+		predicates = append(predicates, rechargeorder.OrderIDGTE(*i.OrderIDGTE))
+	}
+	if i.OrderIDLT != nil {
+		predicates = append(predicates, rechargeorder.OrderIDLT(*i.OrderIDLT))
+	}
+	if i.OrderIDLTE != nil {
+		predicates = append(predicates, rechargeorder.OrderIDLTE(*i.OrderIDLTE))
+	}
+	if i.OrderIDContains != nil {
+		predicates = append(predicates, rechargeorder.OrderIDContains(*i.OrderIDContains))
+	}
+	if i.OrderIDHasPrefix != nil {
+		predicates = append(predicates, rechargeorder.OrderIDHasPrefix(*i.OrderIDHasPrefix))
+	}
+	if i.OrderIDHasSuffix != nil {
+		predicates = append(predicates, rechargeorder.OrderIDHasSuffix(*i.OrderIDHasSuffix))
+	}
+	if i.OrderIDEqualFold != nil {
+		predicates = append(predicates, rechargeorder.OrderIDEqualFold(*i.OrderIDEqualFold))
+	}
+	if i.OrderIDContainsFold != nil {
+		predicates = append(predicates, rechargeorder.OrderIDContainsFold(*i.OrderIDContainsFold))
+	}
+	if i.UserID != nil {
+		predicates = append(predicates, rechargeorder.UserIDEQ(*i.UserID))
+	}
+	if i.UserIDNEQ != nil {
+		predicates = append(predicates, rechargeorder.UserIDNEQ(*i.UserIDNEQ))
+	}
+	if len(i.UserIDIn) > 0 {
+		predicates = append(predicates, rechargeorder.UserIDIn(i.UserIDIn...))
+	}
+	if len(i.UserIDNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.UserIDNotIn(i.UserIDNotIn...))
+	}
+	if i.UserIDGT != nil {
+		predicates = append(predicates, rechargeorder.UserIDGT(*i.UserIDGT))
+	}
+	if i.UserIDGTE != nil {
+		predicates = append(predicates, rechargeorder.UserIDGTE(*i.UserIDGTE))
+	}
+	if i.UserIDLT != nil {
+		predicates = append(predicates, rechargeorder.UserIDLT(*i.UserIDLT))
+	}
+	if i.UserIDLTE != nil {
+		predicates = append(predicates, rechargeorder.UserIDLTE(*i.UserIDLTE))
+	}
+	if i.Type != nil {
+		predicates = append(predicates, rechargeorder.TypeEQ(*i.Type))
+	}
+	if i.TypeNEQ != nil {
+		predicates = append(predicates, rechargeorder.TypeNEQ(*i.TypeNEQ))
+	}
+	if len(i.TypeIn) > 0 {
+		predicates = append(predicates, rechargeorder.TypeIn(i.TypeIn...))
+	}
+	if len(i.TypeNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.TypeNotIn(i.TypeNotIn...))
+	}
+	if i.Amount != nil {
+		predicates = append(predicates, rechargeorder.AmountEQ(*i.Amount))
+	}
+	if i.AmountNEQ != nil {
+		predicates = append(predicates, rechargeorder.AmountNEQ(*i.AmountNEQ))
+	}
+	if len(i.AmountIn) > 0 {
+		predicates = append(predicates, rechargeorder.AmountIn(i.AmountIn...))
+	}
+	if len(i.AmountNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.AmountNotIn(i.AmountNotIn...))
+	}
+	if i.AmountGT != nil {
+		predicates = append(predicates, rechargeorder.AmountGT(*i.AmountGT))
+	}
+	if i.AmountGTE != nil {
+		predicates = append(predicates, rechargeorder.AmountGTE(*i.AmountGTE))
+	}
+	if i.AmountLT != nil {
+		predicates = append(predicates, rechargeorder.AmountLT(*i.AmountLT))
+	}
+	if i.AmountLTE != nil {
+		predicates = append(predicates, rechargeorder.AmountLTE(*i.AmountLTE))
+	}
+	if i.Status != nil {
+		predicates = append(predicates, rechargeorder.StatusEQ(*i.Status))
+	}
+	if i.StatusNEQ != nil {
+		predicates = append(predicates, rechargeorder.StatusNEQ(*i.StatusNEQ))
+	}
+	if len(i.StatusIn) > 0 {
+		predicates = append(predicates, rechargeorder.StatusIn(i.StatusIn...))
+	}
+	if len(i.StatusNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.StatusNotIn(i.StatusNotIn...))
+	}
+	if i.PaymentMethod != nil {
+		predicates = append(predicates, rechargeorder.PaymentMethodEQ(*i.PaymentMethod))
+	}
+	if i.PaymentMethodNEQ != nil {
+		predicates = append(predicates, rechargeorder.PaymentMethodNEQ(*i.PaymentMethodNEQ))
+	}
+	if len(i.PaymentMethodIn) > 0 {
+		predicates = append(predicates, rechargeorder.PaymentMethodIn(i.PaymentMethodIn...))
+	}
+	if len(i.PaymentMethodNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.PaymentMethodNotIn(i.PaymentMethodNotIn...))
+	}
+	if i.PaymentMethodGT != nil {
+		predicates = append(predicates, rechargeorder.PaymentMethodGT(*i.PaymentMethodGT))
+	}
+	if i.PaymentMethodGTE != nil {
+		predicates = append(predicates, rechargeorder.PaymentMethodGTE(*i.PaymentMethodGTE))
+	}
+	if i.PaymentMethodLT != nil {
+		predicates = append(predicates, rechargeorder.PaymentMethodLT(*i.PaymentMethodLT))
+	}
+	if i.PaymentMethodLTE != nil {
+		predicates = append(predicates, rechargeorder.PaymentMethodLTE(*i.PaymentMethodLTE))
+	}
+	if i.PaymentMethodContains != nil {
+		predicates = append(predicates, rechargeorder.PaymentMethodContains(*i.PaymentMethodContains))
+	}
+	if i.PaymentMethodHasPrefix != nil {
+		predicates = append(predicates, rechargeorder.PaymentMethodHasPrefix(*i.PaymentMethodHasPrefix))
+	}
+	if i.PaymentMethodHasSuffix != nil {
+		predicates = append(predicates, rechargeorder.PaymentMethodHasSuffix(*i.PaymentMethodHasSuffix))
+	}
+	if i.PaymentMethodIsNil {
+		predicates = append(predicates, rechargeorder.PaymentMethodIsNil())
+	}
+	if i.PaymentMethodNotNil {
+		predicates = append(predicates, rechargeorder.PaymentMethodNotNil())
+	}
+	if i.PaymentMethodEqualFold != nil {
+		predicates = append(predicates, rechargeorder.PaymentMethodEqualFold(*i.PaymentMethodEqualFold))
+	}
+	if i.PaymentMethodContainsFold != nil {
+		predicates = append(predicates, rechargeorder.PaymentMethodContainsFold(*i.PaymentMethodContainsFold))
+	}
+	if i.TradeID != nil {
+		predicates = append(predicates, rechargeorder.TradeIDEQ(*i.TradeID))
+	}
+	if i.TradeIDNEQ != nil {
+		predicates = append(predicates, rechargeorder.TradeIDNEQ(*i.TradeIDNEQ))
+	}
+	if len(i.TradeIDIn) > 0 {
+		predicates = append(predicates, rechargeorder.TradeIDIn(i.TradeIDIn...))
+	}
+	if len(i.TradeIDNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.TradeIDNotIn(i.TradeIDNotIn...))
+	}
+	if i.TradeIDGT != nil {
+		predicates = append(predicates, rechargeorder.TradeIDGT(*i.TradeIDGT))
+	}
+	if i.TradeIDGTE != nil {
+		predicates = append(predicates, rechargeorder.TradeIDGTE(*i.TradeIDGTE))
+	}
+	if i.TradeIDLT != nil {
+		predicates = append(predicates, rechargeorder.TradeIDLT(*i.TradeIDLT))
+	}
+	if i.TradeIDLTE != nil {
+		predicates = append(predicates, rechargeorder.TradeIDLTE(*i.TradeIDLTE))
+	}
+	if i.TradeIDContains != nil {
+		predicates = append(predicates, rechargeorder.TradeIDContains(*i.TradeIDContains))
+	}
+	if i.TradeIDHasPrefix != nil {
+		predicates = append(predicates, rechargeorder.TradeIDHasPrefix(*i.TradeIDHasPrefix))
+	}
+	if i.TradeIDHasSuffix != nil {
+		predicates = append(predicates, rechargeorder.TradeIDHasSuffix(*i.TradeIDHasSuffix))
+	}
+	if i.TradeIDIsNil {
+		predicates = append(predicates, rechargeorder.TradeIDIsNil())
+	}
+	if i.TradeIDNotNil {
+		predicates = append(predicates, rechargeorder.TradeIDNotNil())
+	}
+	if i.TradeIDEqualFold != nil {
+		predicates = append(predicates, rechargeorder.TradeIDEqualFold(*i.TradeIDEqualFold))
+	}
+	if i.TradeIDContainsFold != nil {
+		predicates = append(predicates, rechargeorder.TradeIDContainsFold(*i.TradeIDContainsFold))
+	}
+	if i.PaidAmount != nil {
+		predicates = append(predicates, rechargeorder.PaidAmountEQ(*i.PaidAmount))
+	}
+	if i.PaidAmountNEQ != nil {
+		predicates = append(predicates, rechargeorder.PaidAmountNEQ(*i.PaidAmountNEQ))
+	}
+	if len(i.PaidAmountIn) > 0 {
+		predicates = append(predicates, rechargeorder.PaidAmountIn(i.PaidAmountIn...))
+	}
+	if len(i.PaidAmountNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.PaidAmountNotIn(i.PaidAmountNotIn...))
+	}
+	if i.PaidAmountGT != nil {
+		predicates = append(predicates, rechargeorder.PaidAmountGT(*i.PaidAmountGT))
+	}
+	if i.PaidAmountGTE != nil {
+		predicates = append(predicates, rechargeorder.PaidAmountGTE(*i.PaidAmountGTE))
+	}
+	if i.PaidAmountLT != nil {
+		predicates = append(predicates, rechargeorder.PaidAmountLT(*i.PaidAmountLT))
+	}
+	if i.PaidAmountLTE != nil {
+		predicates = append(predicates, rechargeorder.PaidAmountLTE(*i.PaidAmountLTE))
+	}
+	if i.PaidAmountIsNil {
+		predicates = append(predicates, rechargeorder.PaidAmountIsNil())
+	}
+	if i.PaidAmountNotNil {
+		predicates = append(predicates, rechargeorder.PaidAmountNotNil())
+	}
+	if i.PaidAt != nil {
+		predicates = append(predicates, rechargeorder.PaidAtEQ(*i.PaidAt))
+	}
+	if i.PaidAtNEQ != nil {
+		predicates = append(predicates, rechargeorder.PaidAtNEQ(*i.PaidAtNEQ))
+	}
+	if len(i.PaidAtIn) > 0 {
+		predicates = append(predicates, rechargeorder.PaidAtIn(i.PaidAtIn...))
+	}
+	if len(i.PaidAtNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.PaidAtNotIn(i.PaidAtNotIn...))
+	}
+	if i.PaidAtGT != nil {
+		predicates = append(predicates, rechargeorder.PaidAtGT(*i.PaidAtGT))
+	}
+	if i.PaidAtGTE != nil {
+		predicates = append(predicates, rechargeorder.PaidAtGTE(*i.PaidAtGTE))
+	}
+	if i.PaidAtLT != nil {
+		predicates = append(predicates, rechargeorder.PaidAtLT(*i.PaidAtLT))
+	}
+	if i.PaidAtLTE != nil {
+		predicates = append(predicates, rechargeorder.PaidAtLTE(*i.PaidAtLTE))
+	}
+	if i.PaidAtIsNil {
+		predicates = append(predicates, rechargeorder.PaidAtIsNil())
+	}
+	if i.PaidAtNotNil {
+		predicates = append(predicates, rechargeorder.PaidAtNotNil())
+	}
+	if i.ExpiresAt != nil {
+		predicates = append(predicates, rechargeorder.ExpiresAtEQ(*i.ExpiresAt))
+	}
+	if i.ExpiresAtNEQ != nil {
+		predicates = append(predicates, rechargeorder.ExpiresAtNEQ(*i.ExpiresAtNEQ))
+	}
+	if len(i.ExpiresAtIn) > 0 {
+		predicates = append(predicates, rechargeorder.ExpiresAtIn(i.ExpiresAtIn...))
+	}
+	if len(i.ExpiresAtNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.ExpiresAtNotIn(i.ExpiresAtNotIn...))
+	}
+	if i.ExpiresAtGT != nil {
+		predicates = append(predicates, rechargeorder.ExpiresAtGT(*i.ExpiresAtGT))
+	}
+	if i.ExpiresAtGTE != nil {
+		predicates = append(predicates, rechargeorder.ExpiresAtGTE(*i.ExpiresAtGTE))
+	}
+	if i.ExpiresAtLT != nil {
+		predicates = append(predicates, rechargeorder.ExpiresAtLT(*i.ExpiresAtLT))
+	}
+	if i.ExpiresAtLTE != nil {
+		predicates = append(predicates, rechargeorder.ExpiresAtLTE(*i.ExpiresAtLTE))
+	}
+	if i.ExpiresAtIsNil {
+		predicates = append(predicates, rechargeorder.ExpiresAtIsNil())
+	}
+	if i.ExpiresAtNotNil {
+		predicates = append(predicates, rechargeorder.ExpiresAtNotNil())
+	}
+	if i.Description != nil {
+		predicates = append(predicates, rechargeorder.DescriptionEQ(*i.Description))
+	}
+	if i.DescriptionNEQ != nil {
+		predicates = append(predicates, rechargeorder.DescriptionNEQ(*i.DescriptionNEQ))
+	}
+	if len(i.DescriptionIn) > 0 {
+		predicates = append(predicates, rechargeorder.DescriptionIn(i.DescriptionIn...))
+	}
+	if len(i.DescriptionNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.DescriptionNotIn(i.DescriptionNotIn...))
+	}
+	if i.DescriptionGT != nil {
+		predicates = append(predicates, rechargeorder.DescriptionGT(*i.DescriptionGT))
+	}
+	if i.DescriptionGTE != nil {
+		predicates = append(predicates, rechargeorder.DescriptionGTE(*i.DescriptionGTE))
+	}
+	if i.DescriptionLT != nil {
+		predicates = append(predicates, rechargeorder.DescriptionLT(*i.DescriptionLT))
+	}
+	if i.DescriptionLTE != nil {
+		predicates = append(predicates, rechargeorder.DescriptionLTE(*i.DescriptionLTE))
+	}
+	if i.DescriptionContains != nil {
+		predicates = append(predicates, rechargeorder.DescriptionContains(*i.DescriptionContains))
+	}
+	if i.DescriptionHasPrefix != nil {
+		predicates = append(predicates, rechargeorder.DescriptionHasPrefix(*i.DescriptionHasPrefix))
+	}
+	if i.DescriptionHasSuffix != nil {
+		predicates = append(predicates, rechargeorder.DescriptionHasSuffix(*i.DescriptionHasSuffix))
+	}
+	if i.DescriptionIsNil {
+		predicates = append(predicates, rechargeorder.DescriptionIsNil())
+	}
+	if i.DescriptionNotNil {
+		predicates = append(predicates, rechargeorder.DescriptionNotNil())
+	}
+	if i.DescriptionEqualFold != nil {
+		predicates = append(predicates, rechargeorder.DescriptionEqualFold(*i.DescriptionEqualFold))
+	}
+	if i.DescriptionContainsFold != nil {
+		predicates = append(predicates, rechargeorder.DescriptionContainsFold(*i.DescriptionContainsFold))
+	}
+	if i.PackageID != nil {
+		predicates = append(predicates, rechargeorder.PackageIDEQ(*i.PackageID))
+	}
+	if i.PackageIDNEQ != nil {
+		predicates = append(predicates, rechargeorder.PackageIDNEQ(*i.PackageIDNEQ))
+	}
+	if len(i.PackageIDIn) > 0 {
+		predicates = append(predicates, rechargeorder.PackageIDIn(i.PackageIDIn...))
+	}
+	if len(i.PackageIDNotIn) > 0 {
+		predicates = append(predicates, rechargeorder.PackageIDNotIn(i.PackageIDNotIn...))
+	}
+	if i.PackageIDGT != nil {
+		predicates = append(predicates, rechargeorder.PackageIDGT(*i.PackageIDGT))
+	}
+	if i.PackageIDGTE != nil {
+		predicates = append(predicates, rechargeorder.PackageIDGTE(*i.PackageIDGTE))
+	}
+	if i.PackageIDLT != nil {
+		predicates = append(predicates, rechargeorder.PackageIDLT(*i.PackageIDLT))
+	}
+	if i.PackageIDLTE != nil {
+		predicates = append(predicates, rechargeorder.PackageIDLTE(*i.PackageIDLTE))
+	}
+	if i.PackageIDIsNil {
+		predicates = append(predicates, rechargeorder.PackageIDIsNil())
+	}
+	if i.PackageIDNotNil {
+		predicates = append(predicates, rechargeorder.PackageIDNotNil())
+	}
+
+	switch len(predicates) {
+	case 0:
+		return nil, ErrEmptyRechargeOrderWhereInput
+	case 1:
+		return predicates[0], nil
+	default:
+		return rechargeorder.And(predicates...), nil
 	}
 }
 

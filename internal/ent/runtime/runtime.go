@@ -17,6 +17,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
 	"github.com/looplj/axonhub/internal/ent/quotatransaction"
+	"github.com/looplj/axonhub/internal/ent/rechargeorder"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
@@ -465,6 +466,21 @@ func init() {
 	quotatransaction.DefaultUpdatedAt = quotatransactionDescUpdatedAt.Default.(func() time.Time)
 	// quotatransaction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	quotatransaction.UpdateDefaultUpdatedAt = quotatransactionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	rechargeorderMixin := schema.RechargeOrder{}.Mixin()
+	rechargeorderMixinFields0 := rechargeorderMixin[0].Fields()
+	_ = rechargeorderMixinFields0
+	rechargeorderFields := schema.RechargeOrder{}.Fields()
+	_ = rechargeorderFields
+	// rechargeorderDescCreatedAt is the schema descriptor for created_at field.
+	rechargeorderDescCreatedAt := rechargeorderMixinFields0[0].Descriptor()
+	// rechargeorder.DefaultCreatedAt holds the default value on creation for the created_at field.
+	rechargeorder.DefaultCreatedAt = rechargeorderDescCreatedAt.Default.(func() time.Time)
+	// rechargeorderDescUpdatedAt is the schema descriptor for updated_at field.
+	rechargeorderDescUpdatedAt := rechargeorderMixinFields0[1].Descriptor()
+	// rechargeorder.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	rechargeorder.DefaultUpdatedAt = rechargeorderDescUpdatedAt.Default.(func() time.Time)
+	// rechargeorder.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	rechargeorder.UpdateDefaultUpdatedAt = rechargeorderDescUpdatedAt.UpdateDefault.(func() time.Time)
 	requestMixin := schema.Request{}.Mixin()
 	request.Policy = privacy.NewPolicies(schema.Request{})
 	request.Hooks[0] = func(next ent.Mutator) ent.Mutator {

@@ -184,11 +184,7 @@ export function useSidebarData(): SidebarData {
           url: '/user-center/api-keys',
           icon: IconKey,
         } as NavLink,
-        {
-          title: t('userCenter.sidebar.packages'),
-          url: '/user-center/packages',
-          icon: IconPackages,
-        } as NavLink,
+        // 套餐功能已移除 - 改用余额扣除模式
         {
           title: t('userCenter.sidebar.billing'),
           url: '/user-center/billing',

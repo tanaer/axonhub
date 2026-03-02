@@ -153,6 +153,18 @@ func (f QuotaTransactionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.QuotaTransactionMutation", m)
 }
 
+// The RechargeOrderFunc type is an adapter to allow the use of ordinary
+// function as RechargeOrder mutator.
+type RechargeOrderFunc func(context.Context, *ent.RechargeOrderMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RechargeOrderFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RechargeOrderMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RechargeOrderMutation", m)
+}
+
 // The RequestFunc type is an adapter to allow the use of ordinary
 // function as Request mutator.
 type RequestFunc func(context.Context, *ent.RequestMutation) (ent.Value, error)

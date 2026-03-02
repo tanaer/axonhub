@@ -26,6 +26,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
 	"github.com/looplj/axonhub/internal/ent/quotatransaction"
+	"github.com/looplj/axonhub/internal/ent/rechargeorder"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
@@ -3928,6 +3929,320 @@ func (_m *QuotaTransaction) ToEdge(order *QuotaTransactionOrder) *QuotaTransacti
 		order = DefaultQuotaTransactionOrder
 	}
 	return &QuotaTransactionEdge{
+		Node:   _m,
+		Cursor: order.Field.toCursor(_m),
+	}
+}
+
+// RechargeOrderEdge is the edge representation of RechargeOrder.
+type RechargeOrderEdge struct {
+	Node   *RechargeOrder `json:"node"`
+	Cursor Cursor         `json:"cursor"`
+}
+
+// RechargeOrderConnection is the connection containing edges to RechargeOrder.
+type RechargeOrderConnection struct {
+	Edges      []*RechargeOrderEdge `json:"edges"`
+	PageInfo   PageInfo             `json:"pageInfo"`
+	TotalCount int                  `json:"totalCount"`
+}
+
+func (c *RechargeOrderConnection) build(nodes []*RechargeOrder, pager *rechargeorderPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *RechargeOrder
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *RechargeOrder {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *RechargeOrder {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*RechargeOrderEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &RechargeOrderEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// RechargeOrderPaginateOption enables pagination customization.
+type RechargeOrderPaginateOption func(*rechargeorderPager) error
+
+// WithRechargeOrderOrder configures pagination ordering.
+func WithRechargeOrderOrder(order *RechargeOrderOrder) RechargeOrderPaginateOption {
+	if order == nil {
+		order = DefaultRechargeOrderOrder
+	}
+	o := *order
+	return func(pager *rechargeorderPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultRechargeOrderOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithRechargeOrderFilter configures pagination filter.
+func WithRechargeOrderFilter(filter func(*RechargeOrderQuery) (*RechargeOrderQuery, error)) RechargeOrderPaginateOption {
+	return func(pager *rechargeorderPager) error {
+		if filter == nil {
+			return errors.New("RechargeOrderQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type rechargeorderPager struct {
+	reverse bool
+	order   *RechargeOrderOrder
+	filter  func(*RechargeOrderQuery) (*RechargeOrderQuery, error)
+}
+
+func newRechargeOrderPager(opts []RechargeOrderPaginateOption, reverse bool) (*rechargeorderPager, error) {
+	pager := &rechargeorderPager{reverse: reverse}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultRechargeOrderOrder
+	}
+	return pager, nil
+}
+
+func (p *rechargeorderPager) applyFilter(query *RechargeOrderQuery) (*RechargeOrderQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *rechargeorderPager) toCursor(_m *RechargeOrder) Cursor {
+	return p.order.Field.toCursor(_m)
+}
+
+func (p *rechargeorderPager) applyCursors(query *RechargeOrderQuery, after, before *Cursor) (*RechargeOrderQuery, error) {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	for _, predicate := range entgql.CursorsPredicate(after, before, DefaultRechargeOrderOrder.Field.column, p.order.Field.column, direction) {
+		query = query.Where(predicate)
+	}
+	return query, nil
+}
+
+func (p *rechargeorderPager) applyOrder(query *RechargeOrderQuery) *RechargeOrderQuery {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	query = query.Order(p.order.Field.toTerm(direction.OrderTermOption()))
+	if p.order.Field != DefaultRechargeOrderOrder.Field {
+		query = query.Order(DefaultRechargeOrderOrder.Field.toTerm(direction.OrderTermOption()))
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return query
+}
+
+func (p *rechargeorderPager) orderExpr(query *RechargeOrderQuery) sql.Querier {
+	direction := p.order.Direction
+	if p.reverse {
+		direction = direction.Reverse()
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(p.order.Field.column)
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.column).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultRechargeOrderOrder.Field {
+			b.Comma().Ident(DefaultRechargeOrderOrder.Field.column).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to RechargeOrder.
+func (_m *RechargeOrderQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...RechargeOrderPaginateOption,
+) (*RechargeOrderConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newRechargeOrderPager(opts, last != nil)
+	if err != nil {
+		return nil, err
+	}
+	if _m, err = pager.applyFilter(_m); err != nil {
+		return nil, err
+	}
+	conn := &RechargeOrderConnection{Edges: []*RechargeOrderEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			c := _m.Clone()
+			c.ctx.Fields = nil
+			if conn.TotalCount, err = c.Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+	if _m, err = pager.applyCursors(_m, after, before); err != nil {
+		return nil, err
+	}
+	limit := paginateLimit(first, last)
+	if limit != 0 {
+		_m.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := _m.collectField(ctx, limit == 1, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+	_m = pager.applyOrder(_m)
+	nodes, err := _m.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+var (
+	// RechargeOrderOrderFieldCreatedAt orders RechargeOrder by created_at.
+	RechargeOrderOrderFieldCreatedAt = &RechargeOrderOrderField{
+		Value: func(_m *RechargeOrder) (ent.Value, error) {
+			return _m.CreatedAt, nil
+		},
+		column: rechargeorder.FieldCreatedAt,
+		toTerm: rechargeorder.ByCreatedAt,
+		toCursor: func(_m *RechargeOrder) Cursor {
+			return Cursor{
+				ID:    _m.ID,
+				Value: _m.CreatedAt,
+			}
+		},
+	}
+	// RechargeOrderOrderFieldUpdatedAt orders RechargeOrder by updated_at.
+	RechargeOrderOrderFieldUpdatedAt = &RechargeOrderOrderField{
+		Value: func(_m *RechargeOrder) (ent.Value, error) {
+			return _m.UpdatedAt, nil
+		},
+		column: rechargeorder.FieldUpdatedAt,
+		toTerm: rechargeorder.ByUpdatedAt,
+		toCursor: func(_m *RechargeOrder) Cursor {
+			return Cursor{
+				ID:    _m.ID,
+				Value: _m.UpdatedAt,
+			}
+		},
+	}
+)
+
+// String implement fmt.Stringer interface.
+func (f RechargeOrderOrderField) String() string {
+	var str string
+	switch f.column {
+	case RechargeOrderOrderFieldCreatedAt.column:
+		str = "CREATED_AT"
+	case RechargeOrderOrderFieldUpdatedAt.column:
+		str = "UPDATED_AT"
+	}
+	return str
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (f RechargeOrderOrderField) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(f.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (f *RechargeOrderOrderField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("RechargeOrderOrderField %T must be a string", v)
+	}
+	switch str {
+	case "CREATED_AT":
+		*f = *RechargeOrderOrderFieldCreatedAt
+	case "UPDATED_AT":
+		*f = *RechargeOrderOrderFieldUpdatedAt
+	default:
+		return fmt.Errorf("%s is not a valid RechargeOrderOrderField", str)
+	}
+	return nil
+}
+
+// RechargeOrderOrderField defines the ordering field of RechargeOrder.
+type RechargeOrderOrderField struct {
+	// Value extracts the ordering value from the given RechargeOrder.
+	Value    func(*RechargeOrder) (ent.Value, error)
+	column   string // field or computed.
+	toTerm   func(...sql.OrderTermOption) rechargeorder.OrderOption
+	toCursor func(*RechargeOrder) Cursor
+}
+
+// RechargeOrderOrder defines the ordering of RechargeOrder.
+type RechargeOrderOrder struct {
+	Direction OrderDirection           `json:"direction"`
+	Field     *RechargeOrderOrderField `json:"field"`
+}
+
+// DefaultRechargeOrderOrder is the default ordering of RechargeOrder.
+var DefaultRechargeOrderOrder = &RechargeOrderOrder{
+	Direction: entgql.OrderDirectionAsc,
+	Field: &RechargeOrderOrderField{
+		Value: func(_m *RechargeOrder) (ent.Value, error) {
+			return _m.ID, nil
+		},
+		column: rechargeorder.FieldID,
+		toTerm: rechargeorder.ByID,
+		toCursor: func(_m *RechargeOrder) Cursor {
+			return Cursor{ID: _m.ID}
+		},
+	},
+}
+
+// ToEdge converts RechargeOrder into RechargeOrderEdge.
+func (_m *RechargeOrder) ToEdge(order *RechargeOrderOrder) *RechargeOrderEdge {
+	if order == nil {
+		order = DefaultRechargeOrderOrder
+	}
+	return &RechargeOrderEdge{
 		Node:   _m,
 		Cursor: order.Field.toCursor(_m),
 	}

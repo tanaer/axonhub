@@ -27,6 +27,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
 	"github.com/looplj/axonhub/internal/ent/quotatransaction"
+	"github.com/looplj/axonhub/internal/ent/rechargeorder"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
@@ -71,6 +72,8 @@ type Client struct {
 	ProviderQuotaStatus *ProviderQuotaStatusClient
 	// QuotaTransaction is the client for interacting with the QuotaTransaction builders.
 	QuotaTransaction *QuotaTransactionClient
+	// RechargeOrder is the client for interacting with the RechargeOrder builders.
+	RechargeOrder *RechargeOrderClient
 	// Request is the client for interacting with the Request builders.
 	Request *RequestClient
 	// RequestExecution is the client for interacting with the RequestExecution builders.
@@ -122,6 +125,7 @@ func (c *Client) init() {
 	c.Prompt = NewPromptClient(c.config)
 	c.ProviderQuotaStatus = NewProviderQuotaStatusClient(c.config)
 	c.QuotaTransaction = NewQuotaTransactionClient(c.config)
+	c.RechargeOrder = NewRechargeOrderClient(c.config)
 	c.Request = NewRequestClient(c.config)
 	c.RequestExecution = NewRequestExecutionClient(c.config)
 	c.Role = NewRoleClient(c.config)
@@ -239,6 +243,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Prompt:                   NewPromptClient(cfg),
 		ProviderQuotaStatus:      NewProviderQuotaStatusClient(cfg),
 		QuotaTransaction:         NewQuotaTransactionClient(cfg),
+		RechargeOrder:            NewRechargeOrderClient(cfg),
 		Request:                  NewRequestClient(cfg),
 		RequestExecution:         NewRequestExecutionClient(cfg),
 		Role:                     NewRoleClient(cfg),
@@ -283,6 +288,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Prompt:                   NewPromptClient(cfg),
 		ProviderQuotaStatus:      NewProviderQuotaStatusClient(cfg),
 		QuotaTransaction:         NewQuotaTransactionClient(cfg),
+		RechargeOrder:            NewRechargeOrderClient(cfg),
 		Request:                  NewRequestClient(cfg),
 		RequestExecution:         NewRequestExecutionClient(cfg),
 		Role:                     NewRoleClient(cfg),
@@ -327,9 +333,10 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.APIKey, c.Channel, c.ChannelModelPrice, c.ChannelModelPriceVersion,
 		c.ChannelOverrideTemplate, c.ChannelProbe, c.DataStorage, c.Model, c.Project,
-		c.Prompt, c.ProviderQuotaStatus, c.QuotaTransaction, c.Request,
-		c.RequestExecution, c.Role, c.SubscriptionPlan, c.System, c.Thread, c.Trace,
-		c.UsageLog, c.User, c.UserProject, c.UserQuota, c.UserRole, c.UserSubscription,
+		c.Prompt, c.ProviderQuotaStatus, c.QuotaTransaction, c.RechargeOrder,
+		c.Request, c.RequestExecution, c.Role, c.SubscriptionPlan, c.System, c.Thread,
+		c.Trace, c.UsageLog, c.User, c.UserProject, c.UserQuota, c.UserRole,
+		c.UserSubscription,
 	} {
 		n.Use(hooks...)
 	}
@@ -341,9 +348,10 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.APIKey, c.Channel, c.ChannelModelPrice, c.ChannelModelPriceVersion,
 		c.ChannelOverrideTemplate, c.ChannelProbe, c.DataStorage, c.Model, c.Project,
-		c.Prompt, c.ProviderQuotaStatus, c.QuotaTransaction, c.Request,
-		c.RequestExecution, c.Role, c.SubscriptionPlan, c.System, c.Thread, c.Trace,
-		c.UsageLog, c.User, c.UserProject, c.UserQuota, c.UserRole, c.UserSubscription,
+		c.Prompt, c.ProviderQuotaStatus, c.QuotaTransaction, c.RechargeOrder,
+		c.Request, c.RequestExecution, c.Role, c.SubscriptionPlan, c.System, c.Thread,
+		c.Trace, c.UsageLog, c.User, c.UserProject, c.UserQuota, c.UserRole,
+		c.UserSubscription,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -376,6 +384,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ProviderQuotaStatus.mutate(ctx, m)
 	case *QuotaTransactionMutation:
 		return c.QuotaTransaction.mutate(ctx, m)
+	case *RechargeOrderMutation:
+		return c.RechargeOrder.mutate(ctx, m)
 	case *RequestMutation:
 		return c.Request.mutate(ctx, m)
 	case *RequestExecutionMutation:
@@ -2451,6 +2461,139 @@ func (c *QuotaTransactionClient) mutate(ctx context.Context, m *QuotaTransaction
 		return (&QuotaTransactionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown QuotaTransaction mutation op: %q", m.Op())
+	}
+}
+
+// RechargeOrderClient is a client for the RechargeOrder schema.
+type RechargeOrderClient struct {
+	config
+}
+
+// NewRechargeOrderClient returns a client for the RechargeOrder from the given config.
+func NewRechargeOrderClient(c config) *RechargeOrderClient {
+	return &RechargeOrderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `rechargeorder.Hooks(f(g(h())))`.
+func (c *RechargeOrderClient) Use(hooks ...Hook) {
+	c.hooks.RechargeOrder = append(c.hooks.RechargeOrder, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `rechargeorder.Intercept(f(g(h())))`.
+func (c *RechargeOrderClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RechargeOrder = append(c.inters.RechargeOrder, interceptors...)
+}
+
+// Create returns a builder for creating a RechargeOrder entity.
+func (c *RechargeOrderClient) Create() *RechargeOrderCreate {
+	mutation := newRechargeOrderMutation(c.config, OpCreate)
+	return &RechargeOrderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RechargeOrder entities.
+func (c *RechargeOrderClient) CreateBulk(builders ...*RechargeOrderCreate) *RechargeOrderCreateBulk {
+	return &RechargeOrderCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RechargeOrderClient) MapCreateBulk(slice any, setFunc func(*RechargeOrderCreate, int)) *RechargeOrderCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RechargeOrderCreateBulk{err: fmt.Errorf("calling to RechargeOrderClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RechargeOrderCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RechargeOrderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RechargeOrder.
+func (c *RechargeOrderClient) Update() *RechargeOrderUpdate {
+	mutation := newRechargeOrderMutation(c.config, OpUpdate)
+	return &RechargeOrderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RechargeOrderClient) UpdateOne(_m *RechargeOrder) *RechargeOrderUpdateOne {
+	mutation := newRechargeOrderMutation(c.config, OpUpdateOne, withRechargeOrder(_m))
+	return &RechargeOrderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RechargeOrderClient) UpdateOneID(id int) *RechargeOrderUpdateOne {
+	mutation := newRechargeOrderMutation(c.config, OpUpdateOne, withRechargeOrderID(id))
+	return &RechargeOrderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RechargeOrder.
+func (c *RechargeOrderClient) Delete() *RechargeOrderDelete {
+	mutation := newRechargeOrderMutation(c.config, OpDelete)
+	return &RechargeOrderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RechargeOrderClient) DeleteOne(_m *RechargeOrder) *RechargeOrderDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RechargeOrderClient) DeleteOneID(id int) *RechargeOrderDeleteOne {
+	builder := c.Delete().Where(rechargeorder.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RechargeOrderDeleteOne{builder}
+}
+
+// Query returns a query builder for RechargeOrder.
+func (c *RechargeOrderClient) Query() *RechargeOrderQuery {
+	return &RechargeOrderQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRechargeOrder},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a RechargeOrder entity by its id.
+func (c *RechargeOrderClient) Get(ctx context.Context, id int) (*RechargeOrder, error) {
+	return c.Query().Where(rechargeorder.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RechargeOrderClient) GetX(ctx context.Context, id int) *RechargeOrder {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *RechargeOrderClient) Hooks() []Hook {
+	return c.hooks.RechargeOrder
+}
+
+// Interceptors returns the client interceptors.
+func (c *RechargeOrderClient) Interceptors() []Interceptor {
+	return c.inters.RechargeOrder
+}
+
+func (c *RechargeOrderClient) mutate(ctx context.Context, m *RechargeOrderMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RechargeOrderCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RechargeOrderUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RechargeOrderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RechargeOrderDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown RechargeOrder mutation op: %q", m.Op())
 	}
 }
 
@@ -4697,15 +4840,15 @@ type (
 	hooks struct {
 		APIKey, Channel, ChannelModelPrice, ChannelModelPriceVersion,
 		ChannelOverrideTemplate, ChannelProbe, DataStorage, Model, Project, Prompt,
-		ProviderQuotaStatus, QuotaTransaction, Request, RequestExecution, Role,
-		SubscriptionPlan, System, Thread, Trace, UsageLog, User, UserProject,
-		UserQuota, UserRole, UserSubscription []ent.Hook
+		ProviderQuotaStatus, QuotaTransaction, RechargeOrder, Request,
+		RequestExecution, Role, SubscriptionPlan, System, Thread, Trace, UsageLog,
+		User, UserProject, UserQuota, UserRole, UserSubscription []ent.Hook
 	}
 	inters struct {
 		APIKey, Channel, ChannelModelPrice, ChannelModelPriceVersion,
 		ChannelOverrideTemplate, ChannelProbe, DataStorage, Model, Project, Prompt,
-		ProviderQuotaStatus, QuotaTransaction, Request, RequestExecution, Role,
-		SubscriptionPlan, System, Thread, Trace, UsageLog, User, UserProject,
-		UserQuota, UserRole, UserSubscription []ent.Interceptor
+		ProviderQuotaStatus, QuotaTransaction, RechargeOrder, Request,
+		RequestExecution, Role, SubscriptionPlan, System, Thread, Trace, UsageLog,
+		User, UserProject, UserQuota, UserRole, UserSubscription []ent.Interceptor
 	}
 )

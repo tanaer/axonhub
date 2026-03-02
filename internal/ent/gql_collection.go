@@ -22,6 +22,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
 	"github.com/looplj/axonhub/internal/ent/quotatransaction"
+	"github.com/looplj/axonhub/internal/ent/rechargeorder"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
@@ -3160,6 +3161,160 @@ func newQuotaTransactionPaginateArgs(rv map[string]any) *quotatransactionPaginat
 	}
 	if v, ok := rv[whereField].(*QuotaTransactionWhereInput); ok {
 		args.opts = append(args.opts, WithQuotaTransactionFilter(v.Filter))
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (_q *RechargeOrderQuery) CollectFields(ctx context.Context, satisfies ...string) (*RechargeOrderQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return _q, nil
+	}
+	if err := _q.collectField(ctx, false, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return _q, nil
+}
+
+func (_q *RechargeOrderQuery) collectField(ctx context.Context, oneNode bool, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(rechargeorder.Columns))
+		selectedFields = []string{rechargeorder.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "createdAt":
+			if _, ok := fieldSeen[rechargeorder.FieldCreatedAt]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldCreatedAt)
+				fieldSeen[rechargeorder.FieldCreatedAt] = struct{}{}
+			}
+		case "updatedAt":
+			if _, ok := fieldSeen[rechargeorder.FieldUpdatedAt]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldUpdatedAt)
+				fieldSeen[rechargeorder.FieldUpdatedAt] = struct{}{}
+			}
+		case "orderID":
+			if _, ok := fieldSeen[rechargeorder.FieldOrderID]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldOrderID)
+				fieldSeen[rechargeorder.FieldOrderID] = struct{}{}
+			}
+		case "userID":
+			if _, ok := fieldSeen[rechargeorder.FieldUserID]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldUserID)
+				fieldSeen[rechargeorder.FieldUserID] = struct{}{}
+			}
+		case "type":
+			if _, ok := fieldSeen[rechargeorder.FieldType]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldType)
+				fieldSeen[rechargeorder.FieldType] = struct{}{}
+			}
+		case "amount":
+			if _, ok := fieldSeen[rechargeorder.FieldAmount]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldAmount)
+				fieldSeen[rechargeorder.FieldAmount] = struct{}{}
+			}
+		case "status":
+			if _, ok := fieldSeen[rechargeorder.FieldStatus]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldStatus)
+				fieldSeen[rechargeorder.FieldStatus] = struct{}{}
+			}
+		case "paymentMethod":
+			if _, ok := fieldSeen[rechargeorder.FieldPaymentMethod]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldPaymentMethod)
+				fieldSeen[rechargeorder.FieldPaymentMethod] = struct{}{}
+			}
+		case "tradeID":
+			if _, ok := fieldSeen[rechargeorder.FieldTradeID]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldTradeID)
+				fieldSeen[rechargeorder.FieldTradeID] = struct{}{}
+			}
+		case "paidAmount":
+			if _, ok := fieldSeen[rechargeorder.FieldPaidAmount]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldPaidAmount)
+				fieldSeen[rechargeorder.FieldPaidAmount] = struct{}{}
+			}
+		case "paidAt":
+			if _, ok := fieldSeen[rechargeorder.FieldPaidAt]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldPaidAt)
+				fieldSeen[rechargeorder.FieldPaidAt] = struct{}{}
+			}
+		case "expiresAt":
+			if _, ok := fieldSeen[rechargeorder.FieldExpiresAt]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldExpiresAt)
+				fieldSeen[rechargeorder.FieldExpiresAt] = struct{}{}
+			}
+		case "description":
+			if _, ok := fieldSeen[rechargeorder.FieldDescription]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldDescription)
+				fieldSeen[rechargeorder.FieldDescription] = struct{}{}
+			}
+		case "packageID":
+			if _, ok := fieldSeen[rechargeorder.FieldPackageID]; !ok {
+				selectedFields = append(selectedFields, rechargeorder.FieldPackageID)
+				fieldSeen[rechargeorder.FieldPackageID] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		_q.Select(selectedFields...)
+	}
+	return nil
+}
+
+type rechargeorderPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []RechargeOrderPaginateOption
+}
+
+func newRechargeOrderPaginateArgs(rv map[string]any) *rechargeorderPaginateArgs {
+	args := &rechargeorderPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[orderByField]; ok {
+		switch v := v.(type) {
+		case map[string]any:
+			var (
+				err1, err2 error
+				order      = &RechargeOrderOrder{Field: &RechargeOrderOrderField{}, Direction: entgql.OrderDirectionAsc}
+			)
+			if d, ok := v[directionField]; ok {
+				err1 = order.Direction.UnmarshalGQL(d)
+			}
+			if f, ok := v[fieldField]; ok {
+				err2 = order.Field.UnmarshalGQL(f)
+			}
+			if err1 == nil && err2 == nil {
+				args.opts = append(args.opts, WithRechargeOrderOrder(order))
+			}
+		case *RechargeOrderOrder:
+			if v != nil {
+				args.opts = append(args.opts, WithRechargeOrderOrder(v))
+			}
+		}
+	}
+	if v, ok := rv[whereField].(*RechargeOrderWhereInput); ok {
+		args.opts = append(args.opts, WithRechargeOrderFilter(v.Filter))
 	}
 	return args
 }

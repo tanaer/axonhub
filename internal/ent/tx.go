@@ -36,6 +36,8 @@ type Tx struct {
 	ProviderQuotaStatus *ProviderQuotaStatusClient
 	// QuotaTransaction is the client for interacting with the QuotaTransaction builders.
 	QuotaTransaction *QuotaTransactionClient
+	// RechargeOrder is the client for interacting with the RechargeOrder builders.
+	RechargeOrder *RechargeOrderClient
 	// Request is the client for interacting with the Request builders.
 	Request *RequestClient
 	// RequestExecution is the client for interacting with the RequestExecution builders.
@@ -205,6 +207,7 @@ func (tx *Tx) init() {
 	tx.Prompt = NewPromptClient(tx.config)
 	tx.ProviderQuotaStatus = NewProviderQuotaStatusClient(tx.config)
 	tx.QuotaTransaction = NewQuotaTransactionClient(tx.config)
+	tx.RechargeOrder = NewRechargeOrderClient(tx.config)
 	tx.Request = NewRequestClient(tx.config)
 	tx.RequestExecution = NewRequestExecutionClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)

@@ -26,6 +26,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
 	"github.com/looplj/axonhub/internal/ent/quotatransaction"
+	"github.com/looplj/axonhub/internal/ent/rechargeorder"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
@@ -107,6 +108,11 @@ var quotatransactionImplementors = []string{"QuotaTransaction", "Node"}
 
 // IsNode implements the Node interface check for GQLGen.
 func (*QuotaTransaction) IsNode() {}
+
+var rechargeorderImplementors = []string{"RechargeOrder", "Node"}
+
+// IsNode implements the Node interface check for GQLGen.
+func (*RechargeOrder) IsNode() {}
 
 var requestImplementors = []string{"Request", "Node"}
 
@@ -335,6 +341,15 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			Where(quotatransaction.ID(id))
 		if fc := graphql.GetFieldContext(ctx); fc != nil {
 			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, quotatransactionImplementors...); err != nil {
+				return nil, err
+			}
+		}
+		return query.Only(ctx)
+	case rechargeorder.Table:
+		query := c.RechargeOrder.Query().
+			Where(rechargeorder.ID(id))
+		if fc := graphql.GetFieldContext(ctx); fc != nil {
+			if err := query.collectField(ctx, true, graphql.GetOperationContext(ctx), fc.Field, nil, rechargeorderImplementors...); err != nil {
 				return nil, err
 			}
 		}
@@ -709,6 +724,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.QuotaTransaction.Query().
 			Where(quotatransaction.IDIn(ids...))
 		query, err := query.CollectFields(ctx, quotatransactionImplementors...)
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case rechargeorder.Table:
+		query := c.RechargeOrder.Query().
+			Where(rechargeorder.IDIn(ids...))
+		query, err := query.CollectFields(ctx, rechargeorderImplementors...)
 		if err != nil {
 			return nil, err
 		}

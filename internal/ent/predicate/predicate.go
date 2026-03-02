@@ -42,6 +42,9 @@ type ProviderQuotaStatus func(*sql.Selector)
 // QuotaTransaction is the predicate function for quotatransaction builders.
 type QuotaTransaction func(*sql.Selector)
 
+// RechargeOrder is the predicate function for rechargeorder builders.
+type RechargeOrder func(*sql.Selector)
+
 // Request is the predicate function for request builders.
 type Request func(*sql.Selector)
 

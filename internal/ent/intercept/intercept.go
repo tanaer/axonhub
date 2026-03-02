@@ -21,6 +21,7 @@ import (
 	"github.com/looplj/axonhub/internal/ent/prompt"
 	"github.com/looplj/axonhub/internal/ent/providerquotastatus"
 	"github.com/looplj/axonhub/internal/ent/quotatransaction"
+	"github.com/looplj/axonhub/internal/ent/rechargeorder"
 	"github.com/looplj/axonhub/internal/ent/request"
 	"github.com/looplj/axonhub/internal/ent/requestexecution"
 	"github.com/looplj/axonhub/internal/ent/role"
@@ -416,6 +417,33 @@ func (f TraverseQuotaTransaction) Traverse(ctx context.Context, q ent.Query) err
 	return fmt.Errorf("unexpected query type %T. expect *ent.QuotaTransactionQuery", q)
 }
 
+// The RechargeOrderFunc type is an adapter to allow the use of ordinary function as a Querier.
+type RechargeOrderFunc func(context.Context, *ent.RechargeOrderQuery) (ent.Value, error)
+
+// Query calls f(ctx, q).
+func (f RechargeOrderFunc) Query(ctx context.Context, q ent.Query) (ent.Value, error) {
+	if q, ok := q.(*ent.RechargeOrderQuery); ok {
+		return f(ctx, q)
+	}
+	return nil, fmt.Errorf("unexpected query type %T. expect *ent.RechargeOrderQuery", q)
+}
+
+// The TraverseRechargeOrder type is an adapter to allow the use of ordinary function as Traverser.
+type TraverseRechargeOrder func(context.Context, *ent.RechargeOrderQuery) error
+
+// Intercept is a dummy implementation of Intercept that returns the next Querier in the pipeline.
+func (f TraverseRechargeOrder) Intercept(next ent.Querier) ent.Querier {
+	return next
+}
+
+// Traverse calls f(ctx, q).
+func (f TraverseRechargeOrder) Traverse(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.RechargeOrderQuery); ok {
+		return f(ctx, q)
+	}
+	return fmt.Errorf("unexpected query type %T. expect *ent.RechargeOrderQuery", q)
+}
+
 // The RequestFunc type is an adapter to allow the use of ordinary function as a Querier.
 type RequestFunc func(context.Context, *ent.RequestQuery) (ent.Value, error)
 
@@ -794,6 +822,8 @@ func NewQuery(q ent.Query) (Query, error) {
 		return &query[*ent.ProviderQuotaStatusQuery, predicate.ProviderQuotaStatus, providerquotastatus.OrderOption]{typ: ent.TypeProviderQuotaStatus, tq: q}, nil
 	case *ent.QuotaTransactionQuery:
 		return &query[*ent.QuotaTransactionQuery, predicate.QuotaTransaction, quotatransaction.OrderOption]{typ: ent.TypeQuotaTransaction, tq: q}, nil
+	case *ent.RechargeOrderQuery:
+		return &query[*ent.RechargeOrderQuery, predicate.RechargeOrder, rechargeorder.OrderOption]{typ: ent.TypeRechargeOrder, tq: q}, nil
 	case *ent.RequestQuery:
 		return &query[*ent.RequestQuery, predicate.Request, request.OrderOption]{typ: ent.TypeRequest, tq: q}, nil
 	case *ent.RequestExecutionQuery:
