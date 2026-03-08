@@ -28,12 +28,12 @@ export function ApiKeysViewDialog() {
         display: `# Set your API key as an environment variable
 export AXONHUB_API_KEY="${maskedApiKey}"
 
-# Edit \${HOME}/.codex/config.toml and configure AxonHub:
+# Edit \${HOME}/.codex/config.toml and configure MuskAPI:
 model = "gpt-5"
 model_provider = "axonhub-responses"
 
 [model_providers.axonhub-responses]
-name = "AxonHub using Chat Completions"
+name = "MuskAPI using Chat Completions"
 base_url = "${currentOrigin}/v1"
 env_key = "AXONHUB_API_KEY"
 wire_api = "responses"
@@ -43,12 +43,12 @@ query_params = {}
         real: `# Set your API key as an environment variable
 export AXONHUB_API_KEY="${apiKey}"
 
-# Edit \${HOME}/.codex/config.toml and configure AxonHub:
+# Edit \${HOME}/.codex/config.toml and configure MuskAPI:
 model = "gpt-5"
 model_provider = "axonhub-responses"
 
 [model_providers.axonhub-responses]
-name = "AxonHub using Chat Completions"
+name = "MuskAPI using Chat Completions"
 base_url = "${currentOrigin}/v1"
 env_key = "AXONHUB_API_KEY"
 wire_api = "responses"

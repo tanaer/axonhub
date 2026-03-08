@@ -20,7 +20,7 @@ export function AppHeader() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();
   const { isMobile } = useSidebar();
-  const displayName = brandSettings?.brandName || 'AxonHub';
+  const displayName = brandSettings?.brandName || 'MuskAPI';
 
   const refreshMutation = useMutation({
     mutationFn: async () => {
